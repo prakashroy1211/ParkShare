@@ -1,0 +1,100 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ParkShare: From Chaos to Convenience</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <style>
+        /* Flex container for the top navbar */
+        .top-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 6px 20px;
+            background-color: #333;
+        }
+
+        /* Logo section on the left */
+        .logo img {
+            height: 40px;
+        }
+
+        /* Navigation links in the center */
+        .nav-links {
+            display: flex;
+            justify-content: center;
+            flex-grow: 1;
+        }
+
+        .nav-links a {
+            color: white;
+            margin: 0 20px;
+            text-decoration: none;
+            font-size: 18px;
+        }
+
+        /* Login button on the right */
+        .login-button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #008CBA;
+            padding: 6px 15px;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            font-size: 16px;
+            width: 100px;
+            line-height: 1;
+        }
+
+        /* Main content styling */
+        .main-content {
+            text-align: center;
+            margin-top: 50px;
+        }
+
+        .signup-button {
+            background-color: #4CAF50;
+            padding: 10px 20px;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+
+        .signup-button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <!-- Top Navigation Bar -->
+    <div class="top-nav">
+        <!-- Logo on the left -->
+        <div class="logo">
+            <img src="{% static 'images/logo.png' %}" alt="ParkShare Logo" />
+        </div>
+
+        <!-- Navigation Links in the center -->
+        <div class="nav-links">
+            <a href="/">Home</a>
+            <a href="#">Features</a>
+            <a href="#">Contact Us</a>
+        </div>
+
+        <!-- Login Button on the right -->
+        <div class="login-button">
+            <a href="{% url 'login' %}" class="login-button">Login</a>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <h1>Welcome to ParkShare!</h1>
+        <p>Find and book the perfect parking space for your vehicle with ease.</p>
+        <a href="{% url 'signup' %}" class="signup-button">Sign Up to Get Started</a>
+    </div>
+</body>
+</html>
