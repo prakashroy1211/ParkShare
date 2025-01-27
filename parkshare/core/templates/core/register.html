@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+{% load static %}
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -29,10 +30,10 @@
 
         /* Left Side (Image) */
         .left {
-            flex: 1;
-            background: url('Frame 427320611.png') no-repeat center center;
-            background-size: contain;
-        }
+    flex: 1;
+    background: url('{% static "images/frame.png" %}') no-repeat center center;
+    background-size: contain;
+}
 
         /* Right Side (Form) */
         .right {
@@ -137,10 +138,16 @@
                     <input type="text" name="first_name" placeholder="Name" required>
                     <input type="text" name="last_name" placeholder="Surname" required>
                 </div>
+                <div class="form-group">
                 <input type="email" name="email" placeholder="Email" required>
+                </div>
+                <div class="form-group">
                 <input type="password" name="password1" placeholder="Password" required>
                 <input type="password" name="password2" placeholder="Confirm password" required>
+                </div>
+                <div class="form-group">
                 <input type="text" name="phone" placeholder="Phone number" required>
+                </div>
 
                 <!-- Submit Button -->
                 <button type="submit" class="btn">Sign up</button>
