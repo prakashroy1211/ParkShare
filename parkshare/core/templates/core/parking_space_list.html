@@ -3,19 +3,151 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Parking Spaces</title>
+    <title>Available Parking Spaces - ParkShare</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f8f9fa;
+            margin: 0;
+            padding: 0;
+            color: #333;
+        }
+
+        header {
+            background-color: #007bff;
+            padding: 40px;
+            text-align: center;
+            color: white;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        header h1 {
+            font-size: 3rem;
+            margin: 0;
+            letter-spacing: 2px;
+        }
+
+        nav {
+            background-color: #343a40;
+            padding: 10px;
+            text-align: center;
+        }
+
+        nav a {
+            font-size: 16px;
+            color: #ffffff;
+            margin: 0 15px;
+            text-decoration: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            transition: background-color 0.3s ease;
+        }
+
+        nav a:hover {
+            background-color: #007bff;
+        }
+
+        .container {
+            padding: 30px;
+            text-align: center;
+        }
+
+        .search-bar {
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .search-bar select, .search-bar input[type="submit"] {
+            padding: 10px;
+            font-size: 16px;
+        }
+
+        .parking-space-card {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin: 20px;
+            padding: 20px;
+            text-align: left;
+        }
+
+        .parking-space-card h3 {
+            font-size: 24px;
+            color: #007bff;
+        }
+
+        .parking-space-card p {
+            font-size: 16px;
+            color: #555;
+        }
+
+        footer {
+            background-color: #343a40;
+            color: white;
+            text-align: center;
+            padding: 15px;
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+        }
+
+        @media (max-width: 768px) {
+            header h1 {
+                font-size: 2rem;
+            }
+
+            nav a {
+                font-size: 14px;
+                margin: 5px;
+            }
+
+            .parking-space-card {
+                padding: 15px;
+            }
+        }
+    </style>
 </head>
 <body>
-    <h1>Parking Spaces</h1>
-    
-    {% if parking_spaces %}
-        <ul>
-            {% for space in parking_spaces %}
-                <li>{{ space.name }} - {{ space.location }}</li>  <!-- Assuming your ParkingSpace model has name and location fields -->
+    <header>
+        <h1>Available Parking Spaces</h1>
+    </header>
+    <nav>
+        <a href="{% url 'core:home' %}">Home</a>
+        <a href="{% url 'core:add_parking_space' %}">Add Parking Space</a>
+        <a href="{% url 'core:logout' %}">Logout</a>
+    </nav>
+    <div class="container">
+        <!-- Search Bar to filter by vehicle type -->
+        <div class="search-bar">
+            <form method="GET" action="{% url 'core:parking_space_list' %}">
+                <select name="vehicle_type" required>
+                    <option value="">Select Vehicle Type</option>
+                    <option value="Car" {% if request.GET.vehicle_type == 'Car' %}selected{% endif %}>Car</option>
+                    <option value="Bike" {% if request.GET.vehicle_type == 'Bike' %}selected{% endif %}>Bike</option>
+                </select>
+                <input type="submit" value="Search Parking">
+            </form>
+        </div>
+
+        <!-- Display parking spaces -->
+        {% if parking_spaces %}
+            {% for parking_space in parking_spaces %}
+                <div class="parking-space-card">
+                    <h3>{{ parking_space.name }}</h3>
+                    <p><strong>Location:</strong> {{ parking_space.location }}</p>
+                    <p><strong>Price per Hour:</strong> ${{ parking_space.price_per_hour }}</p>
+                    <p><strong>Status:</strong> {{ parking_space.available|yesno:"Available,Not Available" }}</p>
+                    <p><strong>Vehicle Type:</strong> {{ parking_space.vehicle_type }}</p>
+                    <a href="{% url 'core:book_parking_space' pk=parking_space.pk %}" class="btn btn-primary">Book Now</a>
+                </div>
             {% endfor %}
-        </ul>
-    {% else %}
-        <p>No parking spaces available.</p>
-    {% endif %}
+        {% else %}
+            <p>No parking spaces available for this vehicle type.</p>
+        {% endif %}
+    </div>
+    <footer>
+        <p>&copy; 2025 ParkShare. All rights reserved.</p>
+    </footer>
 </body>
 </html>

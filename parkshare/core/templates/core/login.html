@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ParkShare - Login</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            display: flex;
+            flex-direction: row;
+            height: 100vh;
+            background-color: #f9f9f9;
+        }
+
+        .left-section, .right-section {
+            width: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .left-section {
+            background-color: #fff;
+        }
+
+        .left-section img {
+            max-width: 80%;
+            height: auto;
+        }
+
+        .right-section {
+            background-color: #f9f9f9;
+        }
+
+        .form-container {
+            width: 80%;
+            max-width: 400px;
+        }
+
+        h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        p {
+            font-size: 14px;
+            margin-bottom: 20px;
+            color: #666;
+        }
+
+        .form-container input {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+
+        .form-container button {
+            width: 100%;
+            padding: 12px;
+            background-color: #d90429;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .form-container button:hover {
+            background-color: #a70321;
+        }
+
+        .alternative {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .alternative a {
+            color: #d90429;
+            text-decoration: none;
+        }
+
+        .alternative a:hover {
+            text-decoration: underline;
+        }
+
+        .dual-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .dual-buttons button {
+            width: 48%;
+        }
+    </style>
+</head>
+<body>
+    <div class="left-section">
+        <img src="Girl-Sign-in 1.png" alt="Phone Mockup">
+    </div>
+
+    <div class="right-section">
+        <div class="form-container">
+            <h1>Login to ParkShare</h1>
+            <p>Enter username and password</p>
+
+            <form action="/login" method="post">
+                <input type="email" name="email" placeholder="E-mail" required>
+                <input type="password" name="password" placeholder="Password" required>
+
+                <div class="dual-buttons">
+                    <button type="submit" name="role" value="driver">Log in (Driver)</button>
+                    <button type="submit" name="role" value="owner">Log in (Parking lot owner)</button>
+                </div>
+            </form>
+
+            <div class="alternative">
+                <p>Don't have an account? <a href="{% url 'core:register' %}">Sign up here</a></p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

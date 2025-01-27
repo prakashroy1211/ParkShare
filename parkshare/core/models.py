@@ -8,17 +8,42 @@ class VehicleType(models.Model):
     def __str__(self):
         return self.name
 
+# UserProfile model for extending the default User model (for additional user details)
+class UserProfile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    vehicle_type = models.ForeignKey(VehicleType, on_delete=models.SET_NULL, null=True)
+    is_slot_owner = models.BooleanField(default=False)  # New field to track if the user is a slot owner
+
+    def __str__(self):
+        return self.user.username
+
+# ParkingSlot model for representing each parking slot
+class ParkingSlot(models.Model):
+    # Associate the parking slot with a parking space
+    parking_space = models.ForeignKey('ParkingSpace', on_delete=models.CASCADE)
+    # Track whether a slot is available
+    available = models.BooleanField(default=True)
+    # Define the slot number or name
+    slot_number = models.CharField(max_length=50)
+    # Optional: Define a vehicle type to restrict which vehicle type fits in the slot
+    vehicle_type = models.ForeignKey(VehicleType, on_delete=models.SET_NULL, null=True, blank=True)
+    
+    def __str__(self):
+        return f"Slot {self.slot_number} in {self.parking_space.location}"
+
 # Parking Space model for parking lot owners
 class ParkingSpace(models.Model):
-    owner = models.ForeignKey(User, on_delete=models.CASCADE)
+    owner = models.ForeignKey(User, on_delete=models.CASCADE)  # Link to the user (slot owner)
     vehicle_type = models.ForeignKey(VehicleType, on_delete=models.SET_NULL, null=True)
     length = models.FloatField()
     width = models.FloatField()
     height = models.FloatField(null=True, blank=True)
     price_per_hour = models.DecimalField(max_digits=10, decimal_places=2)
-    location = models.CharField(max_length=255)
+    location = models.CharField(max_length=255)  # Human-readable location
+    latitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)  # Latitude for map integration
+    longitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)  # Longitude for map integration
     image = models.ImageField(upload_to='parking_spaces/', null=True, blank=True)
-    available = models.BooleanField(default=True)
+    available = models.BooleanField(default=True)  # Availability of the parking space
 
     def __str__(self):
         return f"{self.owner.username}'s space at {self.location}"
@@ -30,15 +55,11 @@ class Booking(models.Model):
     start_time = models.DateTimeField()
     end_time = models.DateTimeField()
     total_price = models.DecimalField(max_digits=10, decimal_places=2)
-    payment_status = models.CharField(max_length=20, choices=[('Paid', 'Paid'), ('Pending', 'Pending')], default='Pending')
+    payment_status = models.CharField(
+        max_length=20,
+        choices=[('Paid', 'Paid'), ('Pending', 'Pending')],
+        default='Pending'
+    )
 
     def __str__(self):
         return f"Booking by {self.user.username} for {self.parking_space.location}"
-
-# UserProfile model for extending the default User model (for additional user details)
-class UserProfile(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
-    vehicle_type = models.ForeignKey(VehicleType, on_delete=models.SET_NULL, null=True)
-
-    def __str__(self):
-        return self.user.username

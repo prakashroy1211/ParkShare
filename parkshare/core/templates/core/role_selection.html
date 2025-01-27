@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Role Selection</title>
+</head>
+<body>
+    <h1>Welcome, {{ user.username }}</h1>
+    <h2>Select your role</h2>
+    <form method="POST">
+        {% csrf_token %}
+        <label>
+            <input type="checkbox" name="is_slot_owner">
+            I am a parking slot owner
+        </label><br>
+        <button type="submit">Save</button>
+    </form>
+</body>
+</html>
