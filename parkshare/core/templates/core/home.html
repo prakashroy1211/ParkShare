@@ -1,94 +1,212 @@
 <!DOCTYPE html>
+{% load static %}
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ParkShare - Home</title>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
     <style>
-        /* Global Styles */
+        /* General Styling */
         body {
             font-family: 'Roboto', sans-serif;
-            background-color: #f8f9fa;
             margin: 0;
             padding: 0;
-            color: #333;
+            background-color: #f8f8f8;
+            position: relative;
+            overflow: hidden;
+        }
+
+        
+
+        /* Background Animation */
+        .bg-animation {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('') no-repeat center center;
+            background-size: cover;
+            opacity: 0.3;
+            z-index: -1;
+            animation: fadeInOut 6s infinite alternate;
+        }
+
+        @keyframes fadeInOut {
+            0% {
+                opacity: 0.2;
+            }
+            100% {
+                opacity: 0.3;
+            }
+        }
+
+        /* Main Container */
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            z-index: 1;
+            position: relative;
         }
 
         header {
-            background-color: #a70321;
-            padding: 40px;
             text-align: center;
-            color: white;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
         }
 
         header h1 {
             font-size: 3rem;
+            color: #d90429;
             margin: 0;
-            letter-spacing: 2px;
+            text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
+        }
+        /* Logo Styling */
+        .logo {
+             position: absolute;
+             top: 20px;
+             left: 20px;
+             width: 100px; /* Adjust size as needed */
+             height: auto;
         }
 
+
         nav {
-            background-color: #343a40;
-            padding: 10px;
-            text-align: center;
+            margin-bottom: 30px;
         }
 
         nav a {
-            font-size: 16px;
-            color: #ffffff;
-            margin: 0 15px;
             text-decoration: none;
-            padding: 10px 15px;
-            border-radius: 5px;
-            transition: background-color 0.3s ease;
+            color: #d90429;
+            font-weight: bold;
+            margin: 0 15px;
+            padding: 10px 20px;
+            border: 2px solid #d90429;
+            border-radius: 20px;
+            transition: all 0.3s ease;
         }
 
         nav a:hover {
-            background-color: #a70321;
+            color: #fff;
+            background-color: #d90429;
         }
 
-        .container {
-            padding: 30px;
+        .content {
             text-align: center;
+            animation: slideIn 1.5s ease;
+        }
+
+        @keyframes slideIn {
+            0% {
+                transform: translateY(50px);
+                opacity: 0;
+            }
+            100% {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .content h2 {
+            font-size: 2rem;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .content p {
+            font-size: 1rem;
+            color: #555;
+            margin-bottom: 20px;
+        }
+
+        .features {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .feature {
+            background: #fff;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            width: 250px;
+            text-align: center;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .feature:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .feature h3 {
+            font-size: 1.5rem;
+            color: #d90429;
+            margin-bottom: 10px;
+        }
+
+        .feature p {
+            font-size: 1rem;
+            color: #555;
         }
 
         footer {
-            background-color: #343a40;
-            color: white;
             text-align: center;
-            padding: 15px;
+            padding: 15px 0;
+            background-color: #fff;
             position: fixed;
             bottom: 0;
             width: 100%;
+            box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
         }
 
-        @media (max-width: 768px) {
-            header h1 {
-                font-size: 2rem;
-            }
-
-            nav a {
-                font-size: 14px;
-                margin: 5px;
-            }
+        footer p {
+            margin: 0;
+            color: #888;
+            font-size: 0.9rem;
         }
+
     </style>
 </head>
 <body>
-    <header>
-        <h1>Welcome to ParkShare</h1>
-    </header>
-    <nav>
-        <a href="{% url 'core:parking_space_list' %}">View Parking Spaces</a>
-        <a href="{% url 'core:add_parking_space' %}">Add Parking Space</a>
-        <a href="{% url 'core:user_login' %}">Login</a>
-        <a href="{% url 'core:register' %}">Register</a> <!-- Register button added here -->
-    </nav>
+    <div class="bg-animation"></div>
     <div class="container">
-        <h2>Share and Find Parking Easily</h2>
-        <p>Welcome to ParkShare, the platform that allows you to share your parking space and find available parking nearby. Start exploring today!</p>
+        <header>
+            <img src="{% static 'images/Slice 1.png' %}" alt="ParkShare Logo" class="logo">
+        
+        </header>
+        
+        <header>
+            <h1>Welcome to ParkShare</h1>
+        </header>
+        <nav>
+            <a href="{% url 'core:user_login' %}">View Parking Spaces</a>
+            <a href="{% url 'core:user_login' %}">Add Parking Space</a>
+            <a href="{% url 'core:user_login' %}">Login</a>
+            <a href="{% url 'core:register' %}">Register</a>
+        </nav>
+        <div class="content">
+            <h2>Share and Find Parking Easily</h2>
+            <p>Welcome to ParkShare, the platform that allows you to share your parking space and find available parking nearby. Start exploring today!</p>
+            <div class="features">
+                <div class="feature">
+                    <h3>Find Nearby Parking</h3>
+                    <p>Locate available parking spaces quickly and easily using our app.</p>
+                </div>
+                <div class="feature">
+                    <h3>Share Your Space</h3>
+                    <p>Earn money by sharing your unused parking spot with others.</p>
+                </div>
+                <div class="feature">
+                    <h3>Smart Booking</h3>
+                    <p>Reserve parking spaces in advance with just a few clicks.</p>
+                </div>
+            </div>
+        </div>
     </div>
     <footer>
         <p>&copy; 2025 ParkShare. All rights reserved.</p>

@@ -20,6 +20,17 @@
             background-color: #f9f9f9;
         }
 
+        .header {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+        }
+
+        .header img {
+            max-width: 150px;
+            height: auto;
+        }
+
         .left-section, .right-section {
             width: 50%;
             display: flex;
@@ -105,9 +116,12 @@
     </style>
 </head>
 <body>
+    <div class="header">
+        <img src="{% static 'images/Slice 1.png' %}" alt="ParkShare Logo">
+    </div>
+
     <div class="left-section">
         <img src="{% static 'images/Girl.png' %}" alt="Phone Mockup">
-
     </div>
 
     <div class="right-section">
