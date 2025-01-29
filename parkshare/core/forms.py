@@ -1,7 +1,8 @@
 from django import forms
-from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib.auth.models import User
 from .models import ParkingSpace, Booking, ParkingSlot
+from .models import CustomUser
 
 # Form for parking space creation and updates
 class ParkingSpaceForm(forms.ModelForm):
@@ -34,19 +35,19 @@ class BookingForm(forms.ModelForm):
             raise forms.ValidationError('This parking space is already booked.')
         return parking_space
 
-# Registration form for user creation
-class RegistrationForm(UserCreationForm):
-    email = forms.EmailField()
+# Registration form
+# Registration form to handle user creation
+class CustomUserCreationForm(UserCreationForm):
+    role = forms.ChoiceField(choices=CustomUser.ROLE_CHOICES, widget=forms.RadioSelect)
+    phone = forms.CharField(max_length=15)
 
     class Meta:
-        model = User
-        fields = ['username', 'email', 'password1', 'password2']
-
-    def save(self, commit=True):
-        user = super().save(commit=False)
-        if commit:
-            user.save()
-        return user
+        model = CustomUser
+        fields = ['first_name', 'last_name', 'email', 'password1', 'password2', 'phone', 'role', 'username']
+# Login form
+class LoginForm(AuthenticationForm):
+    username = forms.CharField(label="Username or Email")
+    password = forms.CharField(widget=forms.PasswordInput)
 
 # Form for parking slot creation and updates
 class ParkingSlotForm(forms.ModelForm):

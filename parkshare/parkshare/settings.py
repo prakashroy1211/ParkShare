@@ -56,7 +56,7 @@ ROOT_URLCONF = 'parkshare.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'templates'],  # Make sure this is correct
+        'DIRS': [os.path.join(BASE_DIR / 'templates')],  # Make sure this is correct
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -78,10 +78,16 @@ WSGI_APPLICATION = 'parkshare.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'parkshare_db',  # Name of your database
+        'USER': 'postgres',  # Using the default postgres user
+        'PASSWORD': 'password',  # The password for the 'postgres' user
+        'HOST': 'localhost',  # or the IP address of your PostgreSQL server
+        'PORT': '5432',  # Default PostgreSQL port
     }
 }
+# settings.py
+AUTH_USER_MODEL = 'core.CustomUser'  # Adjust this based on your app name
 
 
 # Password validation

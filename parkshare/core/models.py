@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
-
+from django.contrib.auth.models import AbstractUser, Group, Permission
+from django.conf import settings
 # Vehicle Type choices for users
 class VehicleType(models.Model):
     name = models.CharField(max_length=50)
@@ -8,9 +9,20 @@ class VehicleType(models.Model):
     def __str__(self):
         return self.name
 
+class CustomUser(AbstractUser):
+    ROLE_CHOICES = [
+        ('user', 'User'),
+        ('owner', 'Owner'),
+    ]
+    phone = models.CharField(max_length=15)
+    role = models.CharField(max_length=10, choices=ROLE_CHOICES)
+
+    def __str__(self):
+        return self.username
+    
 # UserProfile model for extending the default User model (for additional user details)
 class UserProfile(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     vehicle_type = models.ForeignKey(VehicleType, on_delete=models.SET_NULL, null=True)
     is_slot_owner = models.BooleanField(default=False)  # New field to track if the user is a slot owner
 
@@ -20,7 +32,7 @@ class UserProfile(models.Model):
 # ParkingSlot model for representing each parking slot
 class ParkingSlot(models.Model):
     # Associate the parking slot with a parking space
-    parking_space = models.ForeignKey('ParkingSpace', on_delete=models.CASCADE)
+    parking_space = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     # Track whether a slot is available
     available = models.BooleanField(default=True)
     # Define the slot number or name
@@ -33,7 +45,7 @@ class ParkingSlot(models.Model):
 
 # Parking Space model for parking lot owners
 class ParkingSpace(models.Model):
-    owner = models.ForeignKey(User, on_delete=models.CASCADE)  # Link to the user (slot owner)
+    owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)  # Link to the user (slot owner)
     vehicle_type = models.ForeignKey(VehicleType, on_delete=models.SET_NULL, null=True)
     length = models.FloatField()
     width = models.FloatField()
@@ -50,7 +62,7 @@ class ParkingSpace(models.Model):
 
 # Booking model for storing user booking information
 class Booking(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     parking_space = models.ForeignKey(ParkingSpace, on_delete=models.CASCADE)
     start_time = models.DateTimeField()
     end_time = models.DateTimeField()

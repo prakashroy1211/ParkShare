@@ -5,8 +5,11 @@ from django.http import HttpResponse, Http404
 from django.contrib.auth.decorators import login_required
 from django.urls import reverse  # Import reverse for URL generation
 from .models import ParkingSpace, Booking
-from .forms import ParkingSpaceForm, BookingForm, RegistrationForm, ParkingSlotForm
+from .forms import ParkingSpaceForm, BookingForm, ParkingSlotForm
 from django.contrib.auth.models import User
+
+from django.contrib.auth.forms import AuthenticationForm
+from .forms import CustomUserCreationForm, LoginForm
 
 # Home page view
 def home(request):
@@ -21,18 +24,38 @@ def parking_space_list(request):
         parking_spaces = ParkingSpace.objects.filter(available=True)
     return render(request, 'core/parking_space_list.html', {'parking_spaces': parking_spaces})
 
-# Registration view for new user
+# User registration view
+import logging
+logger = logging.getLogger(__name__)
+
 def register(request):
-    if request.method == 'POST':
-        form = RegistrationForm(request.POST)
+    if request.method == "POST":
+        form = CustomUserCreationForm(request.POST)
         if form.is_valid():
-            user = form.save()
-            login(request, user)  # Automatically log the user in after registration
-            return redirect(reverse('core:home'))  # Use reverse to dynamically generate the URL
+            form.save()
+        else:
+            print(form.errors)  # Check for validation errors
+
     else:
-        form = RegistrationForm()
+        form = CustomUserCreationForm()
 
     return render(request, 'core/register.html', {'form': form})
+# User login view
+def user_login(request):
+    if request.method == 'POST':
+        form = LoginForm(request.POST)
+        if form.is_valid():
+            username = form.cleaned_data['username']
+            password = form.cleaned_data['password']
+            user = authenticate(request, username=username, password=password)
+            if user is not None:
+                login(request, user)
+                return redirect('home')  # Redirect to home or dashboard page
+            else:
+                form.add_error(None, "Invalid username or password")
+    else:
+        form = LoginForm()
+    return render(request, 'login.html', {'form': form})
 
 # View to add a new parking space
 @login_required
