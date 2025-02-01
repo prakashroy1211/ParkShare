@@ -38,6 +38,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'rest_framework',
+    'corsheaders',
     'core',
 ]
 
@@ -50,7 +52,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
-
+CORS_ALLOW_ALL_ORIGINS = True
 ROOT_URLCONF = 'parkshare.urls'
 
 TEMPLATES = [
@@ -72,7 +74,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'parkshare.wsgi.application'
 
-
+AUTH_USER_MODEL = 'core.CustomUser'
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
@@ -86,8 +88,6 @@ DATABASES = {
         'PORT': '5432',  # Default PostgreSQL port
     }
 }
-# settings.py
-AUTH_USER_MODEL = 'core.CustomUser'  # Adjust this based on your app name
 
 
 # Password validation
@@ -130,6 +130,7 @@ STATICFILES_DIRS = [
     BASE_DIR / "static",  # This ensures Django knows where to look for static files.
 ]
 
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 # Media files (uploads)
 MEDIA_URL = '/media/'

@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up | ParkShare</title>
+    <style>
+        /* General Styling */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f8f8f8;
+        }
+
+        /* Main Container */
+        .container {
+            display: flex;
+            width: 90%;
+            max-width: 1200px;
+            background-color: #fff;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+        }
+
+        /* Left Side (Image) */
+        .left {
+            flex: 1;
+            background: url('{% static "images/frame.png" %}') no-repeat center center;
+            background-size: contain;
+        }
+
+        /* Right Side (Form) */
+        .right {
+            flex: 1;
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .right h2 {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .right p {
+            font-size: 16px;
+            color: #555;
+            margin-bottom: 20px;
+        }
+
+        /* Form Inputs */
+        .form-group {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .form-group input {
+            flex: 1;
+            padding: 10px 15px;
+            font-size: 16px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+        }
+
+        /* Role Dropdown */
+        .form-group select {
+            flex: 1;
+            padding: 10px 15px;
+            font-size: 16px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+        }
+
+        /* Button */
+        .btn {
+            width: 100%;
+            padding: 10px;
+            background-color: #d90429;
+            color: #fff;
+            font-size: 16px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .btn:hover {
+            background-color: #b00322;
+        }
+
+        /* Links */
+        .links {
+            text-align: center;
+            margin-top: 15px;
+        }
+
+        .links a {
+            text-decoration: none;
+            color: #d90429;
+            font-weight: bold;
+        }
+
+        .links a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Left Side -->
+        <div class="left"></div>
+
+        <!-- Right Side -->
+        <div class="right">
+            <h2>Sign up now</h2>
+            <p>Fill in the form below to get instant access</p>
+
+            <form id="signup-form">
+                {% csrf_token %}
+                <div class="form-group">
+                    <input type="text" id="first_name" placeholder="First Name" required>
+                    <input type="text" id="last_name" placeholder="Last Name" required>
+                </div>
+                <div class="form-group">
+                    <input type="email" id="email" placeholder="Email" required>
+                </div>
+                <div class="form-group">
+                    <input type="text" id="username" placeholder="Username" required>
+                </div>
+                <div class="form-group">
+                    <input type="text" id="phone_number" placeholder="Phone Number" required>
+                </div>
+                <div class="form-group">
+                    <input type="password" id="password" placeholder="Password" required>
+                    <input type="password" id="confirm_password" placeholder="Confirm Password" required>
+                </div>
+                <div class="form-group">
+                    <select id="role">
+                        <option value="driver">Driver</option>
+                        <option value="owner">Owner</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn">Sign Up</button>
+            </form>
+
+            <!-- Login Link -->
+            <div class="links">
+                <p>or</p>
+                <a href="{% url 'login' %}">Log in here</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('signup-form').addEventListener('submit', function(event) {
+    event.preventDefault();
+    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+    const data = {
+        first_name: document.getElementById('first_name').value,
+        last_name: document.getElementById('last_name').value,
+        email: document.getElementById('email').value,
+        username: document.getElementById('username').value,
+        phone_number: document.getElementById('phone_number').value,
+        password: document.getElementById('password').value,
+        role: document.getElementById('role').value,
+    };
+    fetch('/api/register/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrfToken,
+        },
+        body: JSON.stringify(data),
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.errors) {
+            // Handle validation errors
+            let errorMessage = "Registration failed due to the following errors:\n";
+            for (const field in data.errors) {
+                errorMessage += `${field}: ${data.errors[field]}\n`;
+            }
+            alert(errorMessage);  // Display all validation errors in a single alert
+        } else {
+            // No errors, registration successful
+            console.log('Success:', data);
+            alert('Registration successful!');
+            window.location.href = "{% url 'login' %}";  // Redirect to login page
+        }
+    })
+    .catch((error) => {
+        console.error('Error:', error);
+        alert('Registration failed due to a server error. Please try again.');
+    });
+});
+    </script>
+</body>
+</html>

@@ -93,21 +93,11 @@
         .alternative a:hover {
             text-decoration: underline;
         }
-
-        .dual-buttons {
-            display: flex;
-            gap: 10px;
-        }
-
-        .dual-buttons button {
-            width: 48%;
-        }
     </style>
 </head>
 <body>
     <div class="left-section">
         <img src="{% static 'images/Girl.png' %}" alt="Phone Mockup">
-
     </div>
 
     <div class="right-section">
@@ -115,20 +105,54 @@
             <h1>Login to ParkShare</h1>
             <p>Enter username and password</p>
 
-            <form action="/login" method="post">
-                <input type="email" name="email" placeholder="E-mail" required>
-                <input type="password" name="password" placeholder="Password" required>
-
-                <div class="dual-buttons">
-                    <button type="submit" name="role" value="driver">Log in (Driver)</button>
-                    <button type="submit" name="role" value="owner">Log in (Parking lot owner)</button>
-                </div>
+            <form id="login-form">
+                {% csrf_token %}
+                <input type="text" id="username" placeholder="Username" required>
+                <input type="password" id="password" placeholder="Password" required>
+                <button type="submit">Login</button>
             </form>
 
             <div class="alternative">
-                <p>Don't have an account? <a href="{% url 'core:register' %}">Sign up here</a></p>
+                <p>Don't have an account? <a href="{% url 'signup' %}">Sign up here</a></p>
             </div>
         </div>
     </div>
+
+    <script>
+        document.getElementById('login-form').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+            const data = {
+                username: document.getElementById('username').value,
+                password: document.getElementById('password').value,
+            };
+            fetch('/api/login/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfToken,
+                },
+                body: JSON.stringify(data),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.errors) {
+                    let errorMessage = "Login failed due to the following errors:\n";
+                    for (const field in data.errors) {
+                        errorMessage += `${field}: ${data.errors[field]}\n`;
+                    }
+                    alert(errorMessage);  // Display all validation errors in a single alert
+                } else {
+                    console.log('Success:', data);
+                    alert('Login successful!');
+                    window.location.href = "{% url 'home' %}";  // Redirect to home page
+                }
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+                alert('Login failed due to a server error. Please try again.');
+            });
+        });
+    </script>
 </body>
 </html>

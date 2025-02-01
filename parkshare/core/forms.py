@@ -35,15 +35,7 @@ class BookingForm(forms.ModelForm):
             raise forms.ValidationError('This parking space is already booked.')
         return parking_space
 
-# Registration form
-# Registration form to handle user creation
-class CustomUserCreationForm(UserCreationForm):
-    role = forms.ChoiceField(choices=CustomUser.ROLE_CHOICES, widget=forms.RadioSelect)
-    phone = forms.CharField(max_length=15)
 
-    class Meta:
-        model = CustomUser
-        fields = ['first_name', 'last_name', 'email', 'password1', 'password2', 'phone', 'role', 'username']
 # Login form
 class LoginForm(AuthenticationForm):
     username = forms.CharField(label="Username or Email")
