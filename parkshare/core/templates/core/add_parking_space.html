@@ -64,20 +64,6 @@
             popupAnchor: [0, -15],
         });
 
-        // List of parking spaces (from your database or backend)
-        const parkingSpaces = [
-            {% for space in parking_spaces %}
-                {
-                    id: {{ space.id }},
-                    name: "{{ space.name }}",
-                    location: "{{ space.location }}",
-                    latitude: {{ space.latitude }},
-                    longitude: {{ space.longitude }},
-                    price: {{ space.price_per_hour }},
-                    available: {{ space.available|yesno:"true,false" }},
-                },
-            {% endfor %}
-        ];
 
         // Loop through parking spaces and add markers with respective icons
         parkingSpaces.forEach(function(space) {

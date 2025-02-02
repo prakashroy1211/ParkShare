@@ -131,10 +131,7 @@
                     <input type="text" id="last_name" placeholder="Last Name" required>
                 </div>
                 <div class="form-group">
-                    <input type="email" id="email" placeholder="Email" required>
-                </div>
-                <div class="form-group">
-                    <input type="text" id="username" placeholder="Username" required>
+                    <input type="email" id="username" placeholder="Email" required>
                 </div>
                 <div class="form-group">
                     <input type="text" id="phone_number" placeholder="Phone Number" required>
@@ -161,18 +158,35 @@
     </div>
 
     <script>
-        document.getElementById('signup-form').addEventListener('submit', function(event) {
-    event.preventDefault();
+    document.getElementById('signup-form').addEventListener('submit', function(event) {
+    event.preventDefault();  // Prevent the default form submission
+    console.log("Form submitted!");  // Debugging: Check if the form submission is triggered
+
+    // Collect form data
     const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+    console.log("CSRF Token:", csrfToken);  // Debugging: Check if the CSRF token is being fetched
+
+    const password = document.getElementById('password').value;
+    const confirmPassword = document.getElementById('confirm_password').value;
+
+    // Validate if password and confirm password match
+    if (password !== confirmPassword) {
+        alert("Passwords do not match. Please try again.");
+        return;  // Stop the form submission if passwords don't match
+    }
+
     const data = {
         first_name: document.getElementById('first_name').value,
         last_name: document.getElementById('last_name').value,
-        email: document.getElementById('email').value,
-        username: document.getElementById('username').value,
+        username: document.getElementById('username').value,  // Use email as username
         phone_number: document.getElementById('phone_number').value,
-        password: document.getElementById('password').value,
+        password: password,
+        confirm_password: confirmPassword,
         role: document.getElementById('role').value,
     };
+    console.log("Form Data:", data);  // Debugging: Check if the form data is being collected
+
+    // Send the POST request
     fetch('/api/register/', {
         method: 'POST',
         headers: {
@@ -181,8 +195,12 @@
         },
         body: JSON.stringify(data),
     })
-    .then(response => response.json())
+    .then(response => {
+        console.log("Response Status:", response.status);  // Debugging: Check the response status
+        return response.json();
+    })
     .then(data => {
+        console.log("Response Data:", data);  // Debugging: Check the response data
         if (data.errors) {
             // Handle validation errors
             let errorMessage = "Registration failed due to the following errors:\n";
@@ -202,6 +220,6 @@
         alert('Registration failed due to a server error. Please try again.');
     });
 });
-    </script>
+</script>
 </body>
 </html>

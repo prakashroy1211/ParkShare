@@ -36,10 +36,6 @@ class BookingForm(forms.ModelForm):
         return parking_space
 
 
-# Login form
-class LoginForm(AuthenticationForm):
-    username = forms.CharField(label="Username or Email")
-    password = forms.CharField(widget=forms.PasswordInput)
 
 # Form for parking slot creation and updates
 class ParkingSlotForm(forms.ModelForm):
