@@ -1,18 +1,40 @@
+# serializers.py
 from rest_framework import serializers
 from .models import CustomUser
+from rest_framework.exceptions import ValidationError
 
 class CustomUserSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True)
+    confirm_password = serializers.CharField(write_only=True)
 
     class Meta:
         model = CustomUser
-        fields = ['first_name', 'last_name', 'username', 'phone_number', 'password', 'role']
+        fields = ['username', 'first_name', 'last_name', 'phone_number', 'password', 'confirm_password', 'role']
 
-    def validate_username(self, value):
-        if CustomUser.objects.filter(username=value).exists():
-            raise serializers.ValidationError("This username is already taken")
-        return value
+    def validate(self, data):
+        """
+        Custom validation for passwords.
+        - Ensures passwords match.
+        """
+        password = data.get('password')
+        confirm_password = data.get('confirm_password')
+
+        # Ensure passwords match
+        if password != confirm_password:
+            raise ValidationError({"confirm_password": "Passwords do not match."})
+
+        return data
 
     def create(self, validated_data):
-        user = CustomUser.objects.create_user(**validated_data)
+        # Create the new user with validated data
+        user = CustomUser(
+            username=validated_data['username'],
+            first_name=validated_data['first_name'],
+            last_name=validated_data['last_name'],
+            phone_number=validated_data['phone_number']
+        )
+        user.set_password(validated_data['password'])  # Hash password
+        user.role = validated_data.get('role', [])  # Assign roles
+        user.save()
+
         return user

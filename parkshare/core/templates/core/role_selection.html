@@ -18,66 +18,16 @@
         <button type="submit">Submit</button>
     </form>
     <script>
-    document.getElementById('login-form').addEventListener('submit', function(event) {
-        event.preventDefault();  // Prevent the default form submission
-    
-        // Collect login data
-        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
-        const username = document.getElementById('username').value;  // Assuming email as username
-        const password = document.getElementById('password').value;
-    
-        const loginData = {
-            username: username,
-            password: password,
-        };
-    
-        console.log("Login Data:", loginData);  // Debugging: Check the login data being sent
-    
-        // Send the POST request to login
-        fetch('/api/login/', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': csrfToken,
-            },
-            body: JSON.stringify(loginData),
-        })
-        .then(response => response.json())
-        .then(data => {
-            console.log("Response Data:", data);  // Debugging: Check the response data
-    
-            if (data.errors) {
-                // Handle login errors
-                let errorMessage = "Login failed due to the following errors:\n";
-                for (const field in data.errors) {
-                    errorMessage += `${field}: ${data.errors[field]}\n`;
-                }
-                alert(errorMessage);  // Display all validation errors in a single alert
+        document.querySelector("form").addEventListener("submit", function(event) {
+            const selectedRole = document.querySelector("input[name='role']:checked");
+        
+            if (!selectedRole) {
+                alert("Please select a role before proceeding.");
+                event.preventDefault(); // Prevent form submission if no role is selected
             } else {
-                // No errors, login successful
-                console.log('Success:', data);
-    
-                const roles = data.roles;  // Assuming the roles are in the response
-    
-                if (roles.includes('Driver') && roles.includes('Owner')) {
-                    // Redirect to role selection page
-                    window.location.href = "/role-selection/";
-                } else if (roles.includes('Driver')) {
-                    // Redirect to Driver's home page
-                    window.location.href = "/driver-home/";
-                } else if (roles.includes('Owner')) {
-                    // Redirect to Owner's home page
-                    window.location.href = "/owner-home/";
-                } else {
-                    alert('No valid roles found for the user.');
-                }
+                console.log("Selected Role:", selectedRole.value); // Debugging
             }
-        })
-        .catch((error) => {
-            console.error('Error:', error);
-            alert('Login failed due to a server error. Please try again.');
         });
-    });
-</script>    
+        </script>  
 </body>
 </html>

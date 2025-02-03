@@ -196,19 +196,23 @@
         body: JSON.stringify(data),
     })
     .then(response => {
-        console.log("Response Status:", response.status);  // Debugging: Check the response status
-        return response.json();
-    })
-    .then(data => {
-        console.log("Response Data:", data);  // Debugging: Check the response data
-        if (data.errors) {
-            // Handle validation errors
+    if (!response.ok) {
+        return response.json().then(data => {
+            // If the response is not OK, show the error message(s) in an alert
             let errorMessage = "Registration failed due to the following errors:\n";
-            for (const field in data.errors) {
-                errorMessage += `${field}: ${data.errors[field]}\n`;
+            if (data.error) {
+                errorMessage += `${data.error}\n`;
             }
-            alert(errorMessage);  // Display all validation errors in a single alert
-        } else {
+            if (data.errors) {
+                for (const field in data.errors) {
+                    data.errors[field].forEach(error => {
+                        errorMessage += `${field}: ${error}\n`;
+                    });
+                }
+            }
+            alert(errorMessage.trim());  // Display the error message(s) in an alert
+        });
+} else {
             // No errors, registration successful
             console.log('Success:', data);
             alert('Registration successful!');

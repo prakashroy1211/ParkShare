@@ -119,69 +119,54 @@
     </div>
 
     <script>
-      document.getElementById('login-form').addEventListener('submit', function(event) {
-    event.preventDefault();  // Prevent the default form submission
-
-    // Collect login data
-    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
-    const username = document.getElementById('username').value;  // Assuming email as username
-    const password = document.getElementById('password').value;
-
-    const loginData = {
-        username: username,
-        password: password,
-    };
-
-    console.log("Login Data:", loginData);  // Debugging: Check the login data being sent
-
-    // Send the POST request to login
-    fetch('/api/login/', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRFToken': csrfToken,
-        },
-        body: JSON.stringify(loginData),
-    })
-    .then(response => {
-        console.log("Response Status:", response.status);  // Debugging: Check the response status
-        return response.json();
-    })
-    .then(data => {
-        console.log("Response Data:", data);  // Debugging: Check the response data
-
-        if (data.errors) {
-            // Handle login errors
-            let errorMessage = "Login failed due to the following errors:\n";
-            for (const field in data.errors) {
-                errorMessage += `${field}: ${data.errors[field]}\n`;
+        document.getElementById('login-form').addEventListener('submit', async function(event) {
+            event.preventDefault();  // Prevent default form submission
+        
+            const data = {
+                username: document.getElementById('username').value,
+                password: document.getElementById('password').value,
+            };
+        
+            try {
+                const response = await fetch('/api/login/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]')?.value || '',
+                    },
+                    body: JSON.stringify(data),
+                    credentials: 'include'  // Ensures session cookie is sent with the request
+                });
+        
+                const responseData = await response.json();
+                console.log("Response Data:", responseData);
+        
+                if (response.status === 200) {
+                    //alert("Login successful!");
+        
+                    // Store user session data
+                    localStorage.setItem("user", JSON.stringify(responseData));
+        
+                    // Handle role-based redirection
+                    const roles = responseData.roles || [];
+                    if (roles.includes("driver") && roles.includes("owner")) {
+                        window.location.href = "{% url 'role_selection' %}";  // Redirect to role selection page
+                    } else if (roles.includes("driver")) {
+                        window.location.href = "{% url 'book_parking_space' %}";  // Redirect to Driver's home page
+                    } else if (roles.includes("owner")) {
+                        window.location.href = "{% url 'add_parking_space' %}";  // Redirect to Owner's home page
+                    } else {
+                        alert("No valid roles found. Please contact support.");
+                    }
+                } else {
+                    alert("Login failed: " + JSON.stringify(responseData.errors));
+                }
+            } catch (error) {
+                console.error("Error:", error);
+                alert("Login failed due to a server error.");
             }
-            alert(errorMessage);  // Display all validation errors in a single alert
-        } else {
-            // No errors, login successful
-            console.log('Success:', data);
-
-            const roles = data.roles;  // Assuming the roles are in the response
-
-            if (roles.includes('Driver') && roles.includes('Owner')) {
-                // Redirect to role selection page
-                window.location.href = "{% url 'role_selection' %}";
-            } else if (roles.includes('Driver')) {
-                // Redirect to Driver's home page
-                window.location.href = "{% url 'book_parking_space' %}";
-            } else if (roles.includes('Owner')) {
-                // Redirect to Owner's home page
-                window.location.href = "{% url 'add_parking_space' %}";
-            } else {
-                alert('No valid roles found for the user.');
-            }
-        }
-    })
-    .catch((error) => {
-        console.error('Error:', error);
-        alert('Login failed due to a server error. Please try again.');
-    });
-});
-    </script>
+        });
+        </script>
+        
 </body>
 </html>
