@@ -81,7 +81,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'parkshare_db',  # Name of your database
         'USER': 'postgres',  # Using the default postgres user
-        'PASSWORD': 'password',  # The password for the 'postgres' user
+        'PASSWORD': '1234',  # The password for the 'postgres' user
         'HOST': 'localhost',  # or the IP address of your PostgreSQL server
         'PORT': '5432',  # Default PostgreSQL port
     }
@@ -139,3 +139,7 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+# Add this line to specify where to redirect after login
+LOGIN_REDIRECT_URL = '/dashboard/'  # Default redirect after login

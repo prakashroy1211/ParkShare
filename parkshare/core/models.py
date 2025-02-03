@@ -45,20 +45,16 @@ class ParkingSlot(models.Model):
 
 # Parking Space model for parking lot owners
 class ParkingSpace(models.Model):
-    owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)  # Link to the user (slot owner)
-    vehicle_type = models.ForeignKey(VehicleType, on_delete=models.SET_NULL, null=True)
-    length = models.FloatField()
-    width = models.FloatField()
-    height = models.FloatField(null=True, blank=True)
+    owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)  # Should exist
+    lot_name = models.CharField(max_length=100)
+    location = models.CharField(max_length=255)
     price_per_hour = models.DecimalField(max_digits=10, decimal_places=2)
-    location = models.CharField(max_length=255)  # Human-readable location
-    latitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)  # Latitude for map integration
-    longitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)  # Longitude for map integration
-    image = models.ImageField(upload_to='parking_spaces/', null=True, blank=True)
-    available = models.BooleanField(default=True)  # Availability of the parking space
+    vehicle_capacity = models.IntegerField()
+    vehicle_type = models.CharField(max_length=50)
+    picture = models.ImageField(upload_to="parking_spaces/", null=True, blank=True)
 
     def __str__(self):
-        return f"{self.owner.username}'s space at {self.location}"
+        return f"{self.lot_name} - {self.location}"
 
 # Booking model for storing user booking information
 class Booking(models.Model):
@@ -75,3 +71,4 @@ class Booking(models.Model):
 
     def __str__(self):
         return f"Booking by {self.user.username} for {self.parking_space.location}"
+  

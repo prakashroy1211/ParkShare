@@ -102,21 +102,32 @@
         .dual-buttons button {
             width: 48%;
         }
+
+        .error-message {
+            color: red;
+            text-align: center;
+            margin-bottom: 10px;
+        }
     </style>
 </head>
 <body>
     <div class="left-section">
         <img src="{% static 'images/Girl.png' %}" alt="Phone Mockup">
-
     </div>
 
     <div class="right-section">
         <div class="form-container">
             <h1>Login to ParkShare</h1>
-            <p>Enter username and password</p>
+            <p>Enter your username and password</p>
 
-            <form action="/login" method="post">
-                <input type="email" name="email" placeholder="E-mail" required>
+            <!-- Show error messages if login fails -->
+            {% if error %}
+                <p class="error-message">{{ error }}</p>
+            {% endif %}
+
+            <form action="{% url 'core:user_login' %}" method="post"> 
+                {% csrf_token %}
+                <input type="text" name="username" placeholder="Username" required>
                 <input type="password" name="password" placeholder="Password" required>
 
                 <div class="dual-buttons">

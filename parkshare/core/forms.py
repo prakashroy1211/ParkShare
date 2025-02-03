@@ -4,17 +4,8 @@ from django.contrib.auth.models import User
 from .models import ParkingSpace, Booking, ParkingSlot
 from .models import CustomUser
 
-# Form for parking space creation and updates
-class ParkingSpaceForm(forms.ModelForm):
-    class Meta:
-        model = ParkingSpace
-        fields = ['vehicle_type', 'length', 'width', 'height', 'price_per_hour', 'location', 'image']
 
-    def clean_price_per_hour(self):
-        price = self.cleaned_data.get('price_per_hour')
-        if price <= 0:
-            raise forms.ValidationError('Price per hour must be greater than zero.')
-        return price
+
 
 # Form for booking parking spaces
 class BookingForm(forms.ModelForm):
@@ -79,3 +70,8 @@ class ParkingSlotForm(forms.ModelForm):
         if ParkingSlot.objects.filter(parking_space=parking_space, slot_number=slot_number).exists():
             raise forms.ValidationError('Slot number already exists for this parking space.')
         return slot_number
+    
+class ParkingSpaceForm(forms.ModelForm):
+    class Meta:
+        model = ParkingSpace
+        fields = ['lot_name', 'vehicle_type', 'vehicle_capacity', 'price_per_hour', 'location', 'picture']
