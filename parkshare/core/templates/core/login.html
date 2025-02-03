@@ -93,6 +93,41 @@
         .alternative a:hover {
             text-decoration: underline;
         }
+        /* Modal Styles */
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.4);
+    }
+    
+    .modal-content {
+        background-color: white;
+        padding: 20px;
+        margin: 15% auto;
+        width: 40%;
+        text-align: center;
+        border-radius: 10px;
+    }
+    
+    .modal-content button {
+        background-color: #d90429;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        margin: 10px;
+        cursor: pointer;
+        font-size: 16px;
+        border-radius: 5px;
+    }
+
+    .modal-content button:hover {
+        background-color: #a70321;
+    }
     </style>
 </head>
 <body>
@@ -117,56 +152,72 @@
             </div>
         </div>
     </div>
+<!-- Role Selection Modal (Initially Hidden) -->
+<div id="roleSelectionModal" class="modal" style="display: none;">
+    <div class="modal-content">
+        <h2>Select Your Role</h2>
+        <p>You have both 'Driver' and 'Owner' roles. Choose how you want to continue:</p>
+        <button onclick="selectRole('driver')">Continue as Driver</button>
+        <button onclick="selectRole('owner')">Continue as Owner</button>
+    </div>
+</div>
+<script>
+    document.getElementById('login-form').addEventListener('submit', async function(event) {
+        event.preventDefault();  // Prevent default form submission
 
-    <script>
-        document.getElementById('login-form').addEventListener('submit', async function(event) {
-            event.preventDefault();  // Prevent default form submission
-        
-            const data = {
-                username: document.getElementById('username').value,
-                password: document.getElementById('password').value,
-            };
-        
-            try {
-                const response = await fetch('/api/login/', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]')?.value || '',
-                    },
-                    body: JSON.stringify(data),
-                    credentials: 'include'  // Ensures session cookie is sent with the request
-                });
-        
-                const responseData = await response.json();
-                console.log("Response Data:", responseData);
-        
-                if (response.status === 200) {
-                    //alert("Login successful!");
-        
-                    // Store user session data
-                    localStorage.setItem("user", JSON.stringify(responseData));
-        
-                    // Handle role-based redirection
-                    const roles = responseData.roles || [];
-                    if (roles.includes("driver") && roles.includes("owner")) {
-                        window.location.href = "{% url 'role_selection' %}";  // Redirect to role selection page
-                    } else if (roles.includes("driver")) {
-                        window.location.href = "{% url 'book_parking_space' %}";  // Redirect to Driver's home page
-                    } else if (roles.includes("owner")) {
-                        window.location.href = "{% url 'add_parking_space' %}";  // Redirect to Owner's home page
-                    } else {
-                        alert("No valid roles found. Please contact support.");
-                    }
+        const data = {
+            username: document.getElementById('username').value,
+            password: document.getElementById('password').value,
+        };
+
+        try {
+            const response = await fetch('/api/login/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]')?.value || '',
+                },
+                body: JSON.stringify(data),
+                credentials: 'include'  // Ensures session cookie is sent with the request
+            });
+
+            const responseData = await response.json();
+            console.log("Response Data:", responseData);
+
+            if (response.status === 200) {
+                // Store user session data
+                localStorage.setItem("user", JSON.stringify(responseData));
+
+                // Handle role-based redirection
+                const roles = responseData.roles || [];
+
+                if (roles.includes("driver") && roles.includes("owner")) {
+                    // Show role selection modal instead of redirecting
+                    document.getElementById("roleSelectionModal").style.display = "block";
+                } else if (roles.includes("driver")) {
+                    window.location.href = "{% url 'user_dashboard' %}";  // Redirect to Driver's home page
+                } else if (roles.includes("owner")) {
+                    window.location.href = "{% url 'owner_dashboard' %}";  // Redirect to Owner's home page
                 } else {
-                    alert("Login failed: " + JSON.stringify(responseData.errors));
+                    alert("No valid roles found. Please contact support.");
                 }
-            } catch (error) {
-                console.error("Error:", error);
-                alert("Login failed due to a server error.");
+            } else {
+                alert("Login failed: " + JSON.stringify(responseData.errors));
             }
-        });
-        </script>
-        
+        } catch (error) {
+            console.error("Error:", error);
+            alert("Login failed due to a server error.");
+        }
+    });
+
+    // Handle role selection
+    function selectRole(role) {
+        if (role === "driver") {
+            window.location.href = "{% url 'user_dashboard' %}";
+        } else if (role === "owner") {
+            window.location.href = "{% url 'owner_dashboard' %}";
+        }
+    }
+</script>
 </body>
 </html>
