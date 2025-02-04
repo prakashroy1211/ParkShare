@@ -175,6 +175,11 @@
             text-decoration: none;
             cursor: pointer;
         }
+        .logout-container {
+    display: flex;
+    justify-content: flex-end; /* Pushes the button to the right */
+    padding: 10px; /* Adds spacing */
+}
         .logout-btn {
     background-color: #d90429;
     color: white;
@@ -196,10 +201,6 @@
         <a href="#"><i class="fas fa-parking"></i> My Parking Lots</a>
         <a href="#"><i class="fas fa-calendar-alt"></i> Reservations</a>
     </div>
-    <form method="POST" action="{% url 'logout' %}">
-        {% csrf_token %}
-        <button type="submit" class="logout-btn">Logout</button>
-    </form>
     <div class="content">
         <div class="header">
             <div class="header-left">
@@ -207,16 +208,19 @@
                 <button class="add-parking-button" id="openModal">+ Add Parking Lot</button>
             </div>
         </div>
-        
         <div class="search-bar">
             <input type="text" placeholder="Search">
         </div>
-        
+        <div class="logout-container">
+            <form method="POST" action="{% url 'logout' %}">
+                {% csrf_token %}
+                <button type="submit" class="logout-btn">Logout</button>
+            </form>
         <div class="user-profile">
             <img src="{% static 'images/user.png' %}" alt="User">
             <span>{{ user.username }}</span>
         </div>
-        
+        </div>
         <div class="parking-lots" id="parking-lots">
             <!-- Parking lots will be added dynamically here -->
         </div>

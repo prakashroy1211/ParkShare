@@ -155,6 +155,11 @@
         .left-section, .right-section {
             width: 48%;
         }
+        .logout-container {
+    display: flex;
+    justify-content: flex-end; /* Pushes the button to the right */
+    padding: 10px; /* Adds spacing */
+}
         .logout-btn {
     background-color: #d90429;
     color: white;
@@ -168,6 +173,19 @@
 .logout-btn:hover {
     background-color: #a70321;
 }
+.user-profile {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            position: absolute;
+            top: 10px;
+            right: 10px;
+        }
+        .user-profile img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+        }
 
     </style>
 
@@ -194,16 +212,17 @@
                 <button onclick="searchLocation()">Search</button>
             </div>
             
-            <!-- CSRF Fix: Use Submit Button Instead of <a> -->
-            <form method="POST" action="#">
+            <div class="user-profile">
+                <img src="{% static 'images/user.png' %}" alt="User">
+                <span>{{ user.username }}</span>
+            </div>
+        </div>
+        <div class="logout-container">
+            <form method="POST" action="{% url 'logout' %}">
                 {% csrf_token %}
-                <button type="submit" class="profile-btn">View Profile</button>
+                <button type="submit" class="logout-btn">Logout</button>
             </form>
         </div>
-        <form method="POST" action="{% url 'logout' %}">
-            {% csrf_token %}
-            <button type="submit" class="logout-btn">Logout</button>
-        </form>
         <!-- Dashboard Content Wrapper -->
         <div class="content-wrapper">
             <!-- Left Section: Available Parking Slots -->
@@ -216,7 +235,6 @@
                     <div class="parking-slot">Slot 4</div>
                 </div>
             </div>
-
             <!-- Right Section: Map Section with Leaflet -->
             <div class="right-section">
                 <div class="map-section" id="mapContainer">
