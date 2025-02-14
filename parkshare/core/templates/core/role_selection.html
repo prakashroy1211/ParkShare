@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Role Selection</title>
+</head>
+<body>
+    <h2>Choose Your Role</h2>
+    <form method="POST" action="{% url 'role-redirect' %}">
+        {% csrf_token %}
+        <label>
+            <input type="radio" name="role" value="Driver" required> Driver
+        </label>
+        <label>
+            <input type="radio" name="role" value="Owner" required> Owner
+        </label>
+        <button type="submit">Submit</button>
+    </form>
+    <script>
+        document.querySelector("form").addEventListener("submit", function(event) {
+            const selectedRole = document.querySelector("input[name='role']:checked");
+        
+            if (!selectedRole) {
+                alert("Please select a role before proceeding.");
+                event.preventDefault(); // Prevent form submission if no role is selected
+            } else {
+                console.log("Selected Role:", selectedRole.value); // Debugging
+            }
+        });
+        </script>  
+</body>
+</html>
