@@ -1,11 +1,7 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib.auth.models import User
-from .models import ParkingSpace, Booking, ParkingSlot
-from .models import CustomUser
-
-
-
+from .models import ParkingSpace, Booking, ParkingSlot, CustomUser
 
 # Form for booking parking spaces
 class BookingForm(forms.ModelForm):
@@ -27,14 +23,14 @@ class BookingForm(forms.ModelForm):
         return parking_space
 
 # Registration form
-# Registration form to handle user creation
 class CustomUserCreationForm(UserCreationForm):
     role = forms.ChoiceField(choices=CustomUser.ROLE_CHOICES, widget=forms.RadioSelect)
-    phone = forms.CharField(max_length=15)
+    phone_number = forms.CharField(max_length=15, required=True)
 
     class Meta:
         model = CustomUser
-        fields = ['first_name', 'last_name', 'email', 'password1', 'password2', 'phone', 'role', 'username']
+        fields = ['first_name', 'last_name', 'email', 'password1', 'password2', 'phone_number', 'role', 'username']
+
 # Login form
 class LoginForm(AuthenticationForm):
     username = forms.CharField(label="Username or Email")
@@ -71,7 +67,9 @@ class ParkingSlotForm(forms.ModelForm):
             raise forms.ValidationError('Slot number already exists for this parking space.')
         return slot_number
     
-class ParkingSpaceForm(forms.ModelForm):
+
+
+class ParkingLotForm(forms.ModelForm):
     class Meta:
         model = ParkingSpace
-        fields = ['lot_name', 'vehicle_type', 'vehicle_capacity', 'price_per_hour', 'location', 'picture']
+        fields = ['lot_name', 'location', 'start_time', 'end_time', 'price_per_hour', 'vehicle_capacity', 'vehicle_type', 'date', 'picture']

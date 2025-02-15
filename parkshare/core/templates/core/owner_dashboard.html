@@ -41,9 +41,6 @@
         .sidebar a i {
             margin-right: 10px;
         }
-        .sidebar a:nth-child(2) {
-            color: red; /* Change color of Reservations link to red */
-        }
         .content {
             flex: 1;
             padding: 20px;
@@ -54,87 +51,61 @@
             align-items: center;
             position: relative;
         }
-        .header-left {
-            display: flex;
-            align-items: center;
-        }
-        .header-left h2 {
-            margin-right: 20px; /* Add some space between the heading and the button */
-        }
-        .search-bar {
-            display: flex;
-            align-items: center;
-            background: white;
-            padding: 10px;
-            border-radius: 25px; /* Rounded corners */
-            box-shadow: 0 0 5px rgba(0,0,0,0.1);
-            width: 50%;
-            margin: 10px 0;
-        }
-        .search-bar input {
-            border: none;
-            outline: none;
-            padding: 5px;
-            margin-right: 10px;
-            flex: 1;
-            border-radius: 25px;
-        }
         .user-profile {
             display: flex;
             align-items: center;
-            gap: 10px;
-            position: absolute;
-            top: 10px;
-            right: 10px;
+            cursor: pointer;
+            position: relative;
+            padding: 10px;
+            background: #f8f8f8;
+            border-radius: 8px;
         }
         .user-profile img {
             width: 40px;
             height: 40px;
             border-radius: 50%;
         }
-        .add-parking-button {
-            background-color: red;
-            color: white;
-            border: none;
-            border-radius: 20px;
-            padding: 10px 20px;
-            cursor: pointer;
-            font-size: 16px;
-            text-align: center;
-        }
-        .parking-lots {
-            margin-top: 20px;
-        }
-        .parking-card {
-            background: white;
-            padding: 20px;
-            margin-bottom: 15px;
-            border-radius: 10px;
+        .profile-dropdown {
+            display: none;
+            position: absolute;
+            top: 50px;
+            right: 0;
+            background: #f8f8f8;
+            border-radius: 8px;
+            padding: 10px;
             box-shadow: 0 0 5px rgba(0,0,0,0.1);
+            min-width: 200px;
+        }
+        .profile-dropdown.active {
+            display: block;
+        }
+        .profile-dropdown a {
             display: flex;
-            justify-content: space-between;
             align-items: center;
-        }
-        .parking-info p {
-            margin: 5px 0;
-        }
-        .actions button {
-            padding: 8px 12px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        .edit {
-            background: white;
-            border: 1px solid black;
+            padding: 8px 10px;
+            text-decoration: none;
             color: black;
+            font-size: 16px;
         }
-        .delete {
-            background: red;
+        .profile-dropdown a i {
+            margin-right: 10px;
+        }
+        .add-parking-button {
+            background-color: #dc3545;
             color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 10px 16px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 5px;
         }
-        
-        /* Modal Styles */
+        .add-parking-button i {
+            font-size: 16px;
+        }
         .modal {
             display: none;
             position: fixed;
@@ -151,29 +122,81 @@
             margin: auto;
             padding: 20px;
             border: 1px solid #888;
-            width: 80%;
-            max-width: 600px;
+            width: 40%;
+            max-height: 80vh;
+            overflow-y: auto;
             border-radius: 10px;
         }
-        .modal-content input,
-        .modal-content select {
+        .modal-content input, .modal-content select {
             width: 100%;
-            padding: 10px;
-            margin-bottom: 10px;
-            border-radius: 5px;
+            padding: 8px;
+            margin: 10px 0;
             border: 1px solid #ddd;
+            border-radius: 5px;
+            box-sizing: border-box;
         }
-        .close {
-            color: #aaa;
-            float: right;
-            font-size: 28px;
-            font-weight: bold;
-        }
-        .close:hover,
-        .close:focus {
-            color: black;
-            text-decoration: none;
+        .modal-content button {
+            padding: 8px 16px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 8px;
             cursor: pointer;
+            font-size: 14px;
+        }
+        .modal-content .cancel-button {
+            background-color: #dc3545;
+        }
+        .modal-content .button-container {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+        .modal-content .button-container button {
+            width: 48%;
+        }
+        .parking-lot {
+            background-color: #fff;
+            padding: 15px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+        .parking-lot button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 5px 10px;
+            cursor: pointer;
+            margin-left: 10px;
+        }
+        .parking-lot button.delete {
+            background-color: #dc3545;
+        }
+
+        
+
+        /* Updated CSS for the logout button */
+        .profile-dropdown button[type="submit"] {
+            background: none;
+            border: none;
+            color: black;
+            font-size: 16px;
+            cursor: pointer;
+            padding: 8px 10px;
+            width: 100%;
+            text-align: left;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .profile-dropdown button[type="submit"]:hover {
+            background-color: #f0f0f0;
+            border-radius: 5px;
+        }
+        .profile-dropdown button[type="submit"] i {
+            margin-right: 10px;
         }
     </style>
 </head>
@@ -183,70 +206,200 @@
         <a href="#"><i class="fas fa-parking"></i> My Parking Lots</a>
         <a href="#"><i class="fas fa-calendar-alt"></i> Reservations</a>
     </div>
-    
     <div class="content">
         <div class="header">
-            <div class="header-left">
-                <h2>My Parking Lots</h2>
-                <button class="add-parking-button" id="openModal">+ Add Parking Lot</button>
+            <h2>My Parking Lots</h2>
+            <button class="add-parking-button" id="openModal"><i class="fas fa-plus"></i> Add Parking Lot</button>
+            <div class="user-profile" id="profileTrigger">
+                <img src="{% static 'images/user.png' %}" alt="User">
+                {% if user.is_authenticated %}
+                    <span>{{ user.username }}</span>
+                {% else %}
+                    <span>Guest</span>
+                {% endif %}
+                <div class="profile-dropdown" id="profileDropdown">
+                    <a href="#"><i class="fas fa-user"></i> My Profile</a>
+                    <form method="POST" action="{% url 'core:logout' %}">
+                        {% csrf_token %}
+                        <button type="submit">
+                            <i class="fas fa-sign-out-alt"></i> Logout
+                        </button>
+                    </form>
+                </div>
             </div>
         </div>
-        
-        <div class="search-bar">
-            <input type="text" placeholder="Search">
+
+        <!-- ✅ List of Parking Lots (Loaded from Django) -->
+        <div id="parkingLotsContainer">
+            {% for lot in parking_lots %}
+                <div class="parking-lot" id="lot-{{ lot.id }}">
+                    <h4>{{ lot.lot_name }}</h4>
+                    <p><strong>Location:</strong> {{ lot.location }}</p>
+                    <p><strong>Working Hours:</strong> {{ lot.start_time }} - {{ lot.end_time }}</p>
+                    <p><strong>Price per Hour:</strong> Rs {{ lot.price_per_hour }}</p>
+                    <p><strong>Vehicle Type:</strong> {{ lot.vehicle_type }}</p>
+                    <p><strong>Capacity:</strong> {{ lot.vehicle_capacity }}</p>
+                    <p><strong>Date:</strong> {{ lot.date }}</p>
+                    {% if lot.picture %}
+                        <img src="{{ lot.picture.url }}" width="100" alt="Parking Image">
+                    {% else %}
+                        <p>No Image Available</p>
+                    {% endif %}
+                    <button onclick="editLot({{ lot.id }})">Edit</button>
+                    <button onclick="deleteLot({{ lot.id }})">Delete</button>
+                </div>
+            {% endfor %}
         </div>
-        
-        <div class="user-profile">
-            <img src="{% static 'images/user.png' %}" alt="User">
-            <span>{{ user.username }}</span>
-        </div>
-        
-        <div class="parking-lots" id="parking-lots">
-            <!-- Parking lots will be added dynamically here -->
+        <!-- ✅ Add/Edit Parking Lot Modal -->
+    <div class="modal" id="parkingLotModal">
+    <div class="modal-content">
+        <h3 id="modalTitle">Add Parking Lot</h3>
+        <input type="hidden" id="editLotId">
+        <label for="lotName">Lot Name</label>
+        <input type="text" id="lotName">
+        <label for="location">Location</label>
+        <input type="text" id="location">
+        <label for="startTime">Start Time</label>
+        <input type="time" id="startTime">
+        <label for="endTime">End Time</label>
+        <input type="time" id="endTime">
+        <label for="pricePerHour">Price per Hour (Rs)</label>
+        <input type="number" id="pricePerHour">
+        <label for="vehicleType">Vehicle Type</label>
+        <select id="vehicleType">
+            <option value="Car">Car</option>
+            <option value="Bike">Bike</option>
+            <option value="Truck">Truck</option>
+        </select>
+        <label for="vehicleCapacity">Vehicle Capacity</label>
+        <input type="number" id="vehicleCapacity">
+        <label for="date">Date</label>
+        <input type="date" id="date">
+        <label for="lotImage">Upload Image</label>
+        <input type="file" id="lotImage">
+        <div class="button-container">
+            <button class="cancel-button" id="cancelModal">Cancel</button>
+            <button id="saveChanges">Save Changes</button>
         </div>
     </div>
+    </div>
 
-    <!-- Modal for Add Parking Lot Form -->
-    <div id="myModal" class="modal">
-        <div class="modal-content">
-            <span class="close" id="closeModal">&times;</span>
-            <h2>Add Parking Lot</h2>
-            <form id="parkingForm" action="/add_parking_lot/" method="POST" enctype="multipart/form-data">
-                {% csrf_token %}
-                <label for="lot_name">Lot Name:</label>
-                <input type="text" id="lot_name" name="lot_name" required>
-                
-                <label for="vehicle_type">Vehicle Type:</label>
-                <select id="vehicle_type" name="vehicle_type" required>
-                    <option value="car">Car</option>
-                    <option value="bike">Bike</option>
-                    <option value="truck">Truck</option>
-                </select>
-                
-                <label for="vehicle_capacity">Vehicle Capacity:</label>
-                <input type="number" id="vehicle_capacity" name="vehicle_capacity" required>
-                
-                <label for="price_per_hour">Price per Hour:</label>
-                <input type="number" id="price_per_hour" name="price_per_hour" required>
-                
-                <label for="location">Location:</label>
-                <input type="text" id="location" name="location" required>
-                
-                <label for="picture">Picture (Optional):</label>
-                <input type="file" id="picture" name="picture" accept="image/*">
-                
-                <button type="submit">Save Changes</button>
-            </form>
-        </div>
     </div>
 
     <script>
-        document.getElementById("openModal").onclick = function() {
-            document.getElementById("myModal").style.display = "block";
+        let isEditing = false;
+let editingLotId = null;
+
+// 🛠️ Open Modal for Adding New Parking Lot
+document.getElementById("openModal").addEventListener("click", function() {
+    isEditing = false;
+    document.getElementById("modalTitle").innerText = "Add Parking Lot";
+    document.getElementById("editLotId").value = "";
+    document.getElementById("lotName").value = "";
+    document.getElementById("location").value = "";
+    document.getElementById("startTime").value = "";
+    document.getElementById("endTime").value = "";
+    document.getElementById("pricePerHour").value = "";
+    document.getElementById("vehicleType").value = "Car";
+    document.getElementById("vehicleCapacity").value = "";
+    document.getElementById("date").value = "";
+    document.getElementById("lotImage").value = "";
+    document.getElementById("parkingLotModal").style.display = "block";
+});
+
+// 🛠️ Open Modal for Editing Existing Parking Lot
+function editLot(lotId) {
+    isEditing = true;
+    editingLotId = lotId;
+
+    fetch(`/edit-parking-space/${lotId}/`)
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            document.getElementById("modalTitle").innerText = "Edit Parking Lot";
+            document.getElementById("editLotId").value = data.id;
+            document.getElementById("lotName").value = data.lotName;
+            document.getElementById("location").value = data.location;
+            document.getElementById("startTime").value = data.startTime;
+            document.getElementById("endTime").value = data.endTime;
+            document.getElementById("pricePerHour").value = data.pricePerHour;
+            document.getElementById("vehicleType").value = data.vehicleType;
+            document.getElementById("vehicleCapacity").value = data.vehicleCapacity;
+            document.getElementById("date").value = data.date;
+            document.getElementById("parkingLotModal").style.display = "block";
         }
-        document.getElementById("closeModal").onclick = function() {
-            document.getElementById("myModal").style.display = "none";
+    });
+}
+
+// 🛠️ Save New or Edited Parking Lot
+document.getElementById("saveChanges").addEventListener("click", function() {
+    let formData = new FormData();
+    formData.append("lot_name", document.getElementById("lotName").value);
+    formData.append("location", document.getElementById("location").value);
+    formData.append("start_time", document.getElementById("startTime").value);
+    formData.append("end_time", document.getElementById("endTime").value);
+    formData.append("price_per_hour", document.getElementById("pricePerHour").value);
+    formData.append("vehicle_type", document.getElementById("vehicleType").value);
+    formData.append("vehicle_capacity", document.getElementById("vehicleCapacity").value);
+    formData.append("date", document.getElementById("date").value);
+    if (document.getElementById("lotImage").files[0]) {
+        formData.append("picture", document.getElementById("lotImage").files[0]);
+    }
+
+    let url = isEditing ? `/edit-parking-space/${editingLotId}/` : "/add-parking-space/";
+    let method = isEditing ? "POST" : "POST";
+
+    fetch(url, {
+        method: method,
+        body: formData,
+        headers: {
+            "X-CSRFToken": document.querySelector("[name=csrfmiddlewaretoken]").value
         }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert(isEditing ? "Parking lot updated successfully!" : "Parking lot added successfully!");
+            location.reload();
+        } else {
+            alert("Error: " + JSON.stringify(data.errors));
+        }
+    });
+});
+
+// 🛠️ Close Modal
+document.getElementById("cancelModal").addEventListener("click", function() {
+    document.getElementById("parkingLotModal").style.display = "none";
+});
+
+
+// 🛠️ Delete Parking Lot
+function deleteLot(lotId) {
+    fetch(`/delete-parking-space/${lotId}/`, {
+        method: "POST",
+        headers: {
+            "X-CSRFToken": document.querySelector("[name=csrfmiddlewaretoken]").value
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            document.getElementById(`lot-${lotId}`).remove();
+        }
+    });
+}
+ // Toggle Profile Dropdown
+ document.getElementById("profileTrigger").addEventListener("click", function() {
+            document.getElementById("profileDropdown").classList.toggle("active");
+        });
+
+        // Close dropdown if clicked outside
+        document.addEventListener("click", function(event) {
+            if (!document.getElementById("profileTrigger").contains(event.target)) {
+                document.getElementById("profileDropdown").classList.remove("active");
+            }
+        });
+
     </script>
 </body>
 </html>

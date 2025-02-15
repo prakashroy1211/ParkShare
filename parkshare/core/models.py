@@ -1,7 +1,9 @@
 from django.db import models
-from django.contrib.auth.models import User
-from django.contrib.auth.models import AbstractUser, Group, Permission
+from django.contrib.auth.models import AbstractUser
 from django.conf import settings
+from datetime import date
+
+
 # Vehicle Type choices for users
 class VehicleType(models.Model):
     name = models.CharField(max_length=50)
@@ -14,7 +16,7 @@ class CustomUser(AbstractUser):
         ('user', 'User'),
         ('owner', 'Owner'),
     ]
-    phone = models.CharField(max_length=15)
+    phone_number = models.CharField(max_length=15)
     role = models.CharField(max_length=10, choices=ROLE_CHOICES)
 
     def __str__(self):
@@ -45,16 +47,23 @@ class ParkingSlot(models.Model):
 
 # Parking Space model for parking lot owners
 class ParkingSpace(models.Model):
-    owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)  # Should exist
+    owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)  
     lot_name = models.CharField(max_length=100)
     location = models.CharField(max_length=255)
+    start_time = models.TimeField()
+    end_time = models.TimeField()
     price_per_hour = models.DecimalField(max_digits=10, decimal_places=2)
-    vehicle_capacity = models.IntegerField()
+    vehicle_capacity = models.PositiveIntegerField()  # Ensure non-negative values
     vehicle_type = models.CharField(max_length=50)
+    date = models.DateField(default=date.today)
     picture = models.ImageField(upload_to="parking_spaces/", null=True, blank=True)
 
+    created_at = models.DateTimeField(auto_now_add=True)  # Track when created
+    updated_at = models.DateTimeField(auto_now=True)  # Track last update
+
     def __str__(self):
-        return f"{self.lot_name} - {self.location}"
+        return f"{self.lot_name} - {self.location} (Capacity: {self.vehicle_capacity})"
+
 
 # Booking model for storing user booking information
 class Booking(models.Model):
@@ -71,4 +80,3 @@ class Booking(models.Model):
 
     def __str__(self):
         return f"Booking by {self.user.username} for {self.parking_space.location}"
-  
