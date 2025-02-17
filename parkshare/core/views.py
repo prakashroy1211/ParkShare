@@ -9,6 +9,11 @@ import logging
 from django.http import JsonResponse
 from .models import ParkingSpace
 from .forms import ParkingLotForm
+from .models import ParkingSpace
+from .forms import ParkingLotForm
+import requests
+from django.contrib import messages
+from .forms import UserProfileForm, ChangePasswordForm
 
 # Set up logging
 logger = logging.getLogger(__name__)
@@ -87,7 +92,8 @@ def parking_space_list(request):
     
     return render(request, 'core/parking_space_list.html', {'parking_spaces': parking_spaces})
 
-# Add parking space view
+
+# ✅ View for Adding a New Parking Space
 @login_required
 def add_parking_space(request):
     if request.method == "POST":
@@ -95,11 +101,35 @@ def add_parking_space(request):
         if form.is_valid():
             parking_space = form.save(commit=False)
             parking_space.owner = request.user
+
+            # 🗺️ Get latitude & longitude using OpenStreetMap API
+            geocode_url = f"https://nominatim.openstreetmap.org/search?q={parking_space.location}&format=json"
+            headers = {
+                "User-Agent": "ParkShare/1.0 (dinasreep@gmail.com)"  # Replace with your app name and email
+            }
+            try:
+                response = requests.get(geocode_url, headers=headers, timeout=5)
+                response.raise_for_status()  # 🚨 Raise error if status != 200
+                geocode_data = response.json()
+
+                if geocode_data and len(geocode_data) > 0:
+                    parking_space.latitude = float(geocode_data[0]["lat"])
+                    parking_space.longitude = float(geocode_data[0]["lon"])
+                else:
+                    return JsonResponse({"success": False, "error": "Location not found"}, status=400)
+
+            except requests.exceptions.RequestException as e:
+                return JsonResponse({"success": False, "error": f"Geocoding API error: {str(e)}"}, status=500)
+
             parking_space.save()
+
             return JsonResponse({
                 'success': True,
+                'id': parking_space.id,
                 'lotName': parking_space.lot_name,
                 'location': parking_space.location,
+                'latitude': parking_space.latitude,
+                'longitude': parking_space.longitude,
                 'startTime': str(parking_space.start_time),
                 'endTime': str(parking_space.end_time),
                 'pricePerHour': str(parking_space.price_per_hour),
@@ -108,12 +138,15 @@ def add_parking_space(request):
                 'date': str(parking_space.date),
                 'imageUrl': parking_space.picture.url if parking_space.picture else ''
             })
+
         else:
             print("❌ Form Errors:", form.errors)
             return JsonResponse({'success': False, 'errors': form.errors}, status=400)
+
     return JsonResponse({'success': False}, status=400)
 
-# Edit parking space
+
+# ✅ View for Editing an Existing Parking Space
 @login_required
 def edit_parking_space(request, id):
     parking_space = get_object_or_404(ParkingSpace, id=id, owner=request.user)
@@ -131,6 +164,8 @@ def edit_parking_space(request, id):
         'id': parking_space.id,
         'lotName': parking_space.lot_name,
         'location': parking_space.location,
+        'latitude': parking_space.latitude,
+        'longitude': parking_space.longitude,
         'startTime': str(parking_space.start_time),
         'endTime': str(parking_space.end_time),
         'pricePerHour': str(parking_space.price_per_hour),
@@ -141,12 +176,24 @@ def edit_parking_space(request, id):
     })
 
 
-# ✅ Delete Parking Lot
+# ✅ View for Deleting a Parking Space
 @login_required
-def delete_parking_space(request, id):
-    parking_space = get_object_or_404(ParkingSpace, pk=pk, owner=request.user)
-    parking_space.delete()
-    return JsonResponse({'success': True})
+def delete_parking_space(request, pk):
+    if request.method == "POST":
+        parking_space = get_object_or_404(ParkingSpace, id=pk, owner=request.user)
+        parking_space.delete()
+        return JsonResponse({"success": True, "message": "Parking space deleted successfully"})
+
+    return JsonResponse({"success": False, "error": "Invalid request method"}, status=400)
+
+
+# ✅ View to Load Parking Spaces for Map
+def get_parking_spaces(request):
+    parking_spaces = ParkingSpace.objects.filter(is_approved=True).values(
+        "id", "lot_name", "location", "latitude", "longitude", 
+        "price_per_hour", "vehicle_type", "vehicle_capacity"
+    )
+    return JsonResponse(list(parking_spaces), safe=False)
 
 @login_required
 def view_reservations(request):
@@ -154,4 +201,34 @@ def view_reservations(request):
 
 @login_required
 def user_profile(request):
-    return render(request, "core/profile.html")
+    return render(request, "core/profile.html", {
+        'user': request.user
+    })
+
+# View to update user profile
+@login_required
+def update_profile(request):
+    if request.method == 'POST':
+        form = UserProfileForm(request.POST, instance=request.user)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Profile updated successfully!")
+            return redirect('core:user_profile')  # Redirect to the profile page after saving
+    else:
+        form = UserProfileForm(instance=request.user)
+
+    return render(request, 'core/profile.html', {'form': form})
+
+# View to change the user's password
+@login_required
+def change_password(request):
+    if request.method == 'POST':
+        form = ChangePasswordForm(user=request.user, data=request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Password changed successfully!")
+            return redirect('core:user_profile')  # Redirect to the profile page after changing password
+    else:
+        form = ChangePasswordForm(user=request.user)
+
+    return render(request, 'core/profile.html', {'form': form})

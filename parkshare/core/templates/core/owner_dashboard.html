@@ -245,8 +245,8 @@
                     {% else %}
                         <p>No Image Available</p>
                     {% endif %}
-                    <button onclick="editLot({{ lot.id }})">Edit</button>
-                    <button onclick="deleteLot({{ lot.id }})">Delete</button>
+                    <button onclick="editLot('{{ lot.id }}')">Edit</button>
+                    <button onclick="deleteLot('{{ lot.id }}')">Delete</button>
                 </div>
             {% endfor %}
         </div>
@@ -342,30 +342,37 @@ document.getElementById("saveChanges").addEventListener("click", function() {
     formData.append("vehicle_type", document.getElementById("vehicleType").value);
     formData.append("vehicle_capacity", document.getElementById("vehicleCapacity").value);
     formData.append("date", document.getElementById("date").value);
+    
+    // Include image if selected
     if (document.getElementById("lotImage").files[0]) {
         formData.append("picture", document.getElementById("lotImage").files[0]);
     }
 
-    let url = isEditing ? `/edit-parking-space/${editingLotId}/` : "/add-parking-space/";
-    let method = isEditing ? "POST" : "POST";
-
+    let url = "/add-parking-space/";
+    
     fetch(url, {
-        method: method,
+        method: "POST",
         body: formData,
         headers: {
             "X-CSRFToken": document.querySelector("[name=csrfmiddlewaretoken]").value
         }
     })
-    .then(response => response.json())
+    .then(response => response.json())  // Parse JSON
     .then(data => {
+        console.log("Server Response:", data);  // Debugging
         if (data.success) {
-            alert(isEditing ? "Parking lot updated successfully!" : "Parking lot added successfully!");
-            location.reload();
+            alert("Parking lot added successfully!");
+            location.reload();  // Refresh to show new lot
         } else {
-            alert("Error: " + JSON.stringify(data.errors));
+            alert("Error: " + (data.error || JSON.stringify(data.errors)));
         }
+    })
+    .catch(error => {
+        console.error("Fetch error:", error);
+        alert("Something went wrong. Please try again.");
     });
 });
+
 
 // 🛠️ Close Modal
 document.getElementById("cancelModal").addEventListener("click", function() {

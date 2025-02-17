@@ -21,8 +21,11 @@ urlpatterns = [
     path('add-parking-space/', add_parking_space, name='add_parking_space'),
     
     path('edit-parking-space/<int:id>/', edit_parking_space, name='edit_parking_space'),  # ✅ Change `pk` to `id`
-    path('delete-parking-space/<int:id>/', delete_parking_space, name='delete_parking_space'),
-    path('profile/', user_profile, name='profile'),
+    path('delete-parking-space/<int:pk>/', delete_parking_space, name='delete_parking_space'),
+    
+    path('profile/', views.user_profile, name='profile'),  # View profile page
+    path('profile/update/', views.update_profile, name='update_profile'),  # Update profile
+    path('profile/change-password/', views.change_password, name='change_password'),
     path('owner-dashboard/', owner_dashboard, name='owner_dashboard'),
 ]
 

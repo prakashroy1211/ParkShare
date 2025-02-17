@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Profile</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+        body {
+            background-color: #f8f9fa;
+            font-family: Arial, sans-serif;
+        }
+        .container {
+            display: flex;
+            width: 100%;
+        }
+        .sidebar {
+            width: 250px;
+            background: white;
+            height: 100vh;
+            padding: 20px;
+            border-right: 1px solid #ddd;
+        }
+        .sidebar img {
+            width: 80px;
+            display: block;
+            margin-bottom: 20px;
+        }
+        .sidebar a {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            text-decoration: none;
+            color: black;
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+        .sidebar a i {
+            margin-right: 10px;
+        }
+        .profile-content {
+            flex: 1;
+            padding: 40px;
+        }
+        .profile-wrapper {
+            display: flex;
+            gap: 40px;
+            align-items: flex-start;
+        }
+        .profile-image {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            border: 1px solid #ddd;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        .profile-image img {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+        }
+        .upload-btn {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 6px 10px;
+            cursor: pointer;
+            border-radius: 8px;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .profile-form {
+            flex: 1;
+            background: white;
+            padding: 20px 25px;
+            margin-top: 20px;
+            border-radius: 10px;
+            border: 1px solid #ddd;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            width: 80%;
+        }
+        .profile-form input {
+            width: 100%;
+            padding: 8px;
+            margin: 12px 0;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+        .save-btn, .change-password-btn {
+            width: 50%; /* Reduced button width to 50% */
+            padding: 8px;
+            border: none;
+            cursor: pointer;
+            border-radius: 8px;
+            font-size: 12px; /* Smaller font size */
+            font-weight: bold;
+            display: block;
+            margin: 10px auto; /* Center the button */
+        }
+        .save-btn {
+            background: #007bff;
+            color: white;
+        }
+        .change-password-btn {
+            background: #dc3545;
+            color: white;
+            margin-top: 30px; /* Increased space between Save Changes button and Change Password */
+        }
+
+        /* Profile Icon and Dropdown Menu CSS */
+        .user-profile {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 10px;
+            background: #f8f8f8;
+            border-radius: 50%;
+            z-index: 1000;
+        }
+        .profile-dropdown {
+            display: none;
+            position: absolute;
+            top: 50px;
+            right: 0;
+            background: #f8f8f8;
+            border-radius: 8px;
+            padding: 10px;
+            box-shadow: 0 0 5px rgba(0,0,0,0.1);
+            min-width: 200px;
+            z-index: 999;
+        }
+        .profile-dropdown.active {
+            display: block;
+        }
+        .profile-dropdown a {
+            display: flex;
+            align-items: center;
+            padding: 8px 10px;
+            text-decoration: none;
+            color: black;
+            font-size: 16px;
+        }
+        .profile-dropdown a i {
+            margin-right: 10px;
+        }
+        .profile-dropdown button[type="submit"] {
+            background: none;
+            border: none;
+            color: black;
+            font-size: 16px;
+            cursor: pointer;
+            padding: 8px 10px;
+            width: 100%;
+            text-align: left;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .profile-dropdown button[type="submit"]:hover {
+            background-color: #f0f0f0;
+            border-radius: 5px;
+        }
+        .profile-dropdown button[type="submit"] i {
+            margin-right: 10px;
+        }
+        .user-profile img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <aside class="sidebar">
+            <img src="{% static 'images/Slice 1.png' %}" alt="Logo">
+            <a href="#"><i class="fas fa-parking"></i> My Parking Lots</a>
+            <a href="#"><i class="fas fa-calendar-alt"></i> Reservations</a>
+        </aside>
+        
+        <main class="profile-content">
+            <h2>My Profile</h2>
+            <div class="profile-wrapper">
+                <div class="profile-image">
+                    <img src="{% static 'images/user.png' %}" alt="User Image">
+                    <button class="upload-btn"><i class="fas fa-upload"></i> Upload new image</button>
+                </div>
+                
+                <div class="profile-form">
+                    <!-- Pre-fill form with the user's details -->
+                    <form method="POST" action="{% url 'core:update_profile' %}">
+                        {% csrf_token %}
+                        <input type="text" id="name" placeholder="Name" name="first_name" value="{{ user.first_name }}">
+                        <input type="text" id="surname" placeholder="Surname" name="last_name" value="{{ user.last_name }}">
+                        <input type="email" id="email" placeholder="Email" name="email" value="{{ user.email }}">
+                        <input type="text" id="phone" placeholder="Phone number" name="phone_number" value="{{ user.profile.phone_number }}"> 
+                        <button class="save-btn"><i class="fas fa-save"></i> Save Changes</button>
+                    </form>
+                    
+                    <h3>Change your password</h3>
+                    <form method="POST" action="{% url 'core:change_password' %}">
+                        {% csrf_token %}
+                        <input type="password" id="new-password" placeholder="New password" name="new_password">
+                        <input type="password" id="confirm-password" placeholder="Confirm new password" name="confirm_password">
+                        <button class="change-password-btn"><i class="fas fa-key"></i> Change Password</button>
+                    </form>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Profile Dropdown -->
+    <div class="user-profile" id="profileTrigger">
+        <img src="{% static 'images/user.png' %}" alt="User">
+        {% if user.is_authenticated %}
+            <span>{{ user.username }}</span>
+        {% else %}
+            <span>Guest</span>
+        {% endif %}
+        <div class="profile-dropdown" id="profileDropdown">
+            <a href="#"><i class="fas fa-user"></i> My Profile</a>
+            <form method="POST" action="{% url 'core:logout' %}">
+                {% csrf_token %}
+                <button type="submit">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Toggle Profile Dropdown
+        document.getElementById("profileTrigger").addEventListener("click", function() {
+            document.getElementById("profileDropdown").classList.toggle("active");
+        });
+
+        // Close dropdown if clicked outside
+        document.addEventListener("click", function(event) {
+            if (!document.getElementById("profileTrigger").contains(event.target)) {
+                document.getElementById("profileDropdown").classList.remove("active");
+            }
+        });
+    </script>
+</body>
+</html>

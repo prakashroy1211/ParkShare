@@ -50,6 +50,8 @@ class ParkingSpace(models.Model):
     owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)  
     lot_name = models.CharField(max_length=100)
     location = models.CharField(max_length=255)
+    latitude = models.FloatField()
+    longitude = models.FloatField()
     start_time = models.TimeField()
     end_time = models.TimeField()
     price_per_hour = models.DecimalField(max_digits=10, decimal_places=2)

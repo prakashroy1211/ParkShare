@@ -2,6 +2,8 @@ from django import forms
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib.auth.models import User
 from .models import ParkingSpace, Booking, ParkingSlot, CustomUser
+from django.contrib.auth.models import User
+from django.contrib.auth.forms import PasswordChangeForm
 
 # Form for booking parking spaces
 class BookingForm(forms.ModelForm):
@@ -73,3 +75,14 @@ class ParkingLotForm(forms.ModelForm):
     class Meta:
         model = ParkingSpace
         fields = ['lot_name', 'location', 'start_time', 'end_time', 'price_per_hour', 'vehicle_capacity', 'vehicle_type', 'date', 'picture']
+
+# Form for updating user profile (first name, last name, email)
+class UserProfileForm(forms.ModelForm):
+    class Meta:
+        model = User
+        fields = ['first_name', 'last_name', 'email']  # You can add more fields here if needed
+
+# Form for changing the user's password
+class ChangePasswordForm(PasswordChangeForm):
+    new_password1 = forms.CharField(label="New password", widget=forms.PasswordInput)
+    new_password2 = forms.CharField(label="Confirm new password", widget=forms.PasswordInput)
