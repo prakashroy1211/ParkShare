@@ -389,36 +389,43 @@ function reserveSlot(lotId) {
 }
 
 
-        // Add default marker
-        L.marker([11.2588, 75.7804]).addTo(map)
-            .bindPopup("Kozhikode, Kerala")
-            .openPopup();
-            function reserveSlot(lotId) {
-        alert("Reserving Parking Slot: " + lotId);
-        // ✅ Later, replace this alert with an AJAX request to reserve the parking space.
-         }
-        // Search Location Function
-        function searchLocation() {
-            const searchQuery = document.getElementById('searchLocation').value;
-            if (searchQuery) {
-                const geocodeUrl = `https://nominatim.openstreetmap.org/search?format=json&q=${searchQuery}`;
-                
-                fetch(geocodeUrl)
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data && data.length > 0) {
-                            const lat = data[0].lat;
-                            const lon = data[0].lon;
-                            map.setView([lat, lon], 13);
-                            L.marker([lat, lon]).addTo(map)
-                                .bindPopup(`${searchQuery}`)
-                                .openPopup();
-                        } else {
-                            alert("Location not found");
-                        }
-                    });
-            }
-        }
+var map = L.map('map').setView([11.2588, 75.7804], 13);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '&copy; OpenStreetMap contributors' }).addTo(map);
+    
+    function loadParkingLots() {
+        fetch("/api/get-parking-lots/")  // Ensure this endpoint returns parking lots with latitude & longitude
+            .then(response => response.json())
+            .then(data => {
+                data.forEach(lot => {
+                    if (lot.latitude && lot.longitude) {
+                        L.marker([parseFloat(lot.latitude), parseFloat(lot.longitude)])
+                            .addTo(map)
+                            .bindPopup(`<strong>${lot.lot_name}</strong><br>📍 ${lot.location}<br>💰 Rs ${lot.price_per_hour}/hour`);
+                    }
+                });
+            });
+    }
+    loadParkingLots(); // Load existing lots on page load
+
+    function searchLocation() {
+        const query = document.getElementById('searchLocation').value;
+        fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${query}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.length > 0) {
+                    const lat = data[0].lat;
+                    const lon = data[0].lon;
+                    map.setView([lat, lon], 13);
+                    L.marker([lat, lon]).addTo(map).bindPopup(query).openPopup();
+                } else {
+                    alert("Location not found");
+                }
+            });
+    }
+
+    function reserveSlot(lotId) {
+    window.location.href = `/payment-confirmation/${lotId}/`;
+}
 
 
         // Toggle Profile Dropdown

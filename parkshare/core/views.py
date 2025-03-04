@@ -14,6 +14,9 @@ from .forms import ParkingLotForm
 import requests
 from django.contrib import messages
 from .forms import UserProfileForm, ChangePasswordForm
+from .models import Reservation
+
+
 
 # Set up logging
 logger = logging.getLogger(__name__)
@@ -79,6 +82,7 @@ def user_dashboard(request):
 # Owner dashboard view
 @login_required
 def owner_dashboard(request):
+    
     parking_lots = ParkingSpace.objects.filter(owner=request.user)  # ✅ Ensure it loads all lots
     return render(request, 'core/owner_dashboard.html', {'parking_lots': parking_lots})
 
@@ -232,3 +236,40 @@ def change_password(request):
         form = ChangePasswordForm(user=request.user)
 
     return render(request, 'core/profile.html', {'form': form})
+
+
+
+def payment_confirmation(request, lot_id):
+    parking_lot = get_object_or_404(ParkingSpace, id=lot_id)
+    return render(request, 'core/payment_confirmation.html', {'parking_lot': parking_lot})
+
+@login_required
+def reservations(request, lot_id=None):
+    if request.method == "POST":
+        # Fetch the parking lot by ID
+        parking_lot = get_object_or_404(ParkingSpace, id=lot_id)
+
+        # Check if there are available slots
+        if parking_lot.vehicle_capacity > 0:
+            # Create a reservation entry
+            reservation = Reservation.objects.create(
+                user=request.user,
+                parking_lot=parking_lot,
+                status='Booked'
+            )
+
+            # Decrease available slots in the parking lot
+            parking_lot.vehicle_capacity -= 1
+            parking_lot.save()
+
+            return JsonResponse({"success": True, "message": "Reservation confirmed!"})
+
+        else:
+            return JsonResponse({"success": False, "error": "No slots available"})
+
+    # If GET request (no POST)
+    # Fetch all confirmed reservations for the logged-in user
+    reservations = Reservation.objects.filter(user=request.user, status='Booked')
+
+    # Render the reservations template
+    return render(request, 'core/reservations.html', {'reservations': reservations})

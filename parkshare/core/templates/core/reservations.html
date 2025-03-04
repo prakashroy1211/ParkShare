@@ -1,7 +1,28 @@
 <!-- ✅ core/templates/core/reservations.html -->
-{% extends 'core/base.html' %}
-
-{% block content %}
-<h2>My Reservations</h2>
-<p>List of all reservations will appear here.</p>
-{% endblock %}
+<h2>Reservations</h2>
+<table border="1">
+    <thead>
+        <tr>
+            <th>User</th>
+            <th>Parking Lot</th>
+            <th>Vehicle Type</th>
+            <th>Reserved On</th>
+            <th>Status</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for res in reservations %}
+        <tr>
+            <td>{{ res.user.username }}</td>
+            <td>{{ res.parking_lot.lot_name }}</td>
+            <td>{{ res.parking_lot.vehicle_type }}</td>
+            <td>{{ res.created_at }}</td>
+            <td>{{ res.status }}</td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="5">No reservations yet.</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>

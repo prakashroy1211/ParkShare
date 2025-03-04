@@ -82,3 +82,10 @@ class Booking(models.Model):
 
     def __str__(self):
         return f"Booking by {self.user.username} for {self.parking_space.location}"
+    
+
+class Reservation(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    parking_lot = models.ForeignKey(ParkingSpace, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+    status = models.CharField(max_length=20, choices=[('Booked', 'Booked'), ('Cancelled', 'Cancelled')])

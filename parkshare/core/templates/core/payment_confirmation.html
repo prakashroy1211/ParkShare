@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Confirmation</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; padding: 50px; }
+        .container { max-width: 500px; margin: auto; padding: 20px; background: #fff; border-radius: 10px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); }
+        .confirm-btn { background: green; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; }
+        input, select { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ccc; border-radius: 5px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Confirm Your Reservation</h2>
+        <p><strong>Parking Lot:</strong> {{ parking_lot.lot_name }}</p>
+        <p><strong>Location:</strong> {{ parking_lot.location }}</p>
+        <p><strong>Price:</strong> Rs {{ parking_lot.price_per_hour }}/hour</p>
+        
+        <label for="vehicle_plate">Vehicle Plate Number:</label>
+        <input type="text" id="vehicle_plate" required>
+        
+        <label for="reservation_date">Reservation Date:</label>
+        <input type="date" id="reservation_date" min="{{ parking_lot.available_from_date }}" max="{{ parking_lot.available_to_date }}" required>
+        
+        <label for="reservation_time_from">Reservation Time From:</label>
+        <input type="time" id="reservation_time_from" min="{{ parking_lot.available_from_time }}" max="{{ parking_lot.available_to_time }}" required>
+        
+        <label for="reservation_time_to">Reservation Time To:</label>
+        <input type="time" id="reservation_time_to" min="{{ parking_lot.available_from_time }}" max="{{ parking_lot.available_to_time }}" required>
+        
+        <button class="confirm-btn" onclick="confirmReservation('{{ parking_lot.id }}')">Confirm Booking</button>
+    </div>
+
+    <script>
+        function confirmReservation(lotId) {
+            const vehiclePlate = document.getElementById("vehicle_plate").value;
+            const reservationDate = document.getElementById("reservation_date").value;
+            const reservationTimeFrom = document.getElementById("reservation_time_from").value;
+            const reservationTimeTo = document.getElementById("reservation_time_to").value;
+
+            if (!vehiclePlate || !reservationDate || !reservationTimeFrom || !reservationTimeTo) {
+                alert("Please fill in all fields.");
+                return;
+            }
+
+            fetch(`/confirm-reservation/${lotId}/`, {
+                method: "POST",
+                headers: {
+                    "X-CSRFToken": "{{ csrf_token }}",
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    vehicle_plate: vehiclePlate,
+                    reservation_date: reservationDate,
+                    reservation_time_from: reservationTimeFrom,
+                    reservation_time_to: reservationTimeTo
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert(`Reservation confirmed! Slot ID: ${data.slot_id}`);
+                    window.location.href = "/user-dashboard/";  // Redirect to dashboard
+                } else {
+                    alert("Error: " + data.error);
+                }
+            })
+            .catch(error => console.error("Error:", error));
+        }
+    </script>
+</body>
+</html>

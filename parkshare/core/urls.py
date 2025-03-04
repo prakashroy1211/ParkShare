@@ -22,6 +22,9 @@ urlpatterns = [
     
     path('edit-parking-space/<int:id>/', edit_parking_space, name='edit_parking_space'),  # ✅ Change `pk` to `id`
     path('delete-parking-space/<int:pk>/', delete_parking_space, name='delete_parking_space'),
+
+    path('payment-confirmation/<int:lot_id>/', views.payment_confirmation, name='payment_confirmation'),
+    path('reservationS/<int:lot_id>/', views.reservations, name='reservations'),
     
     path('profile/', views.user_profile, name='profile'),  # View profile page
     path('profile/update/', views.update_profile, name='update_profile'),  # Update profile
