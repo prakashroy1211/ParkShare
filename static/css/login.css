@@ -1,0 +1,122 @@
+ * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            display: flex;
+            flex-direction: row;
+            height: 100vh;
+            background-color: #f9f9f9;
+        }
+
+        .left-section, .right-section {
+            width: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .left-section {
+            background-color: #fff;
+        }
+
+        .left-section img {
+            max-width: 80%;
+            height: auto;
+        }
+
+        .right-section {
+            background-color: #f9f9f9;
+        }
+
+        .form-container {
+            width: 80%;
+            max-width: 400px;
+        }
+
+        h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        p {
+            font-size: 14px;
+            margin-bottom: 20px;
+            color: #666;
+        }
+
+        .form-container input {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+
+        .form-container button {
+            width: 100%;
+            padding: 12px;
+            background-color: #d90429;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .form-container button:hover {
+            background-color: #a70321;
+        }
+
+        .alternative {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .alternative a {
+            color: #d90429;
+            text-decoration: none;
+        }
+
+        .alternative a:hover {
+            text-decoration: underline;
+        }
+        /* Modal Styles */
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.4);
+    }
+    
+    .modal-content {
+        background-color: white;
+        padding: 20px;
+        margin: 15% auto;
+        width: 40%;
+        text-align: center;
+        border-radius: 10px;
+    }
+    
+    .modal-content button {
+        background-color: #d90429;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        margin: 10px;
+        cursor: pointer;
+        font-size: 16px;
+        border-radius: 5px;
+    }
+
+    .modal-content button:hover {
+        background-color: #a70321;
+    }

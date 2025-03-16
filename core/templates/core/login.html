@@ -5,175 +5,54 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ParkShare - Login</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: Arial, sans-serif;
-        }
-
-        body {
-            display: flex;
-            flex-direction: row;
-            height: 100vh;
-            background-color: #f9f9f9;
-        }
-
-        .left-section, .right-section {
-            width: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .left-section {
-            background-color: #fff;
-        }
-
-        .left-section img {
-            max-width: 80%;
-            height: auto;
-        }
-
-        .right-section {
-            background-color: #f9f9f9;
-        }
-
-        .form-container {
-            width: 80%;
-            max-width: 400px;
-        }
-
-        h1 {
-            font-size: 28px;
-            margin-bottom: 10px;
-            color: #333;
-        }
-
-        p {
-            font-size: 14px;
-            margin-bottom: 20px;
-            color: #666;
-        }
-
-        .form-container input {
-            width: 100%;
-            padding: 12px;
-            margin-bottom: 10px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-        }
-
-        .form-container button {
-            width: 100%;
-            padding: 12px;
-            background-color: #d90429;
-            color: #fff;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 16px;
-        }
-
-        .form-container button:hover {
-            background-color: #a70321;
-        }
-
-        .alternative {
-            text-align: center;
-            margin-top: 20px;
-        }
-
-        .alternative a {
-            color: #d90429;
-            text-decoration: none;
-        }
-
-        .alternative a:hover {
-            text-decoration: underline;
-        }
-        /* Modal Styles */
-    .modal {
-        display: none;
-        position: fixed;
-        z-index: 1000;
-        left: 0;
-        top: 0;
-        width: 100%;
-        height: 100%;
-        background-color: rgba(0, 0, 0, 0.4);
-    }
-    
-    .modal-content {
-        background-color: white;
-        padding: 20px;
-        margin: 15% auto;
-        width: 40%;
-        text-align: center;
-        border-radius: 10px;
-    }
-    
-    .modal-content button {
-        background-color: #d90429;
-        color: white;
-        border: none;
-        padding: 10px 20px;
-        margin: 10px;
-        cursor: pointer;
-        font-size: 16px;
-        border-radius: 5px;
-    }
-
-    .modal-content button:hover {
-        background-color: #a70321;
-    }
-    </style>
+    <link rel="stylesheet" href="{% static 'css/login.css' %}">
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
 </head>
 <body>
-    <div class="left-section">
-        <img src="{% static 'images/Girl.png' %}" alt="Phone Mockup">
-    </div>
-
-    <div class="right-section">
-        <div class="form-container">
-            <h1>Login to ParkShare</h1>
-            <p>Enter email and password</p>
-
-            <form id="login-form">
-                {% csrf_token %}
-                <input type="email" id="username" placeholder="Email" required>
-                <input type="password" id="password" placeholder="Password" required>
-                <button type="submit">Login</button>
-            </form>
-
-            <div class="alternative">
-                <p>Don't have an account? <a href="{% url 'signup' %}">Sign up here</a></p>
+    <div class="container-fluid">
+        <div class="row no-gutters">
+            <div class="col-12 col-md-6 left-section">
+                <img src="{% static 'images/Girl.png' %}" alt="Phone Mockup" class="img-fluid">
+            </div>
+            <div class="col-12 col-md-6 right-section">
+                <div class="form-container">
+                    <h1>Login to ParkShare</h1>
+                    <p>Enter email and password</p>
+                    <form id="login-form">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <input type="email" id="username" placeholder="Email" required>
+                        </div>
+                        <div class="mb-3">
+                            <input type="password" id="password" placeholder="Password" required>
+                        </div>
+                        <button type="submit">Login</button>
+                    </form>
+                    <div class="alternative">
+                        <p>Don't have an account? <a href="{% url 'signup' %}">Sign up here</a></p>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
-    <!-- Role Selection Modal (Initially Hidden) -->
     <div id="roleSelectionModal" class="modal" style="display: none;">
         <div class="modal-content">
             <h2>Select Your Role</h2>
             <p>You have both 'Driver' and 'Owner' roles. Choose how you want to continue:</p>
-            <button onclick="selectRole('driver')">Continue as Driver</button>
-            <button onclick="selectRole('owner')">Continue as Owner</button>
+            <button onclick="selectRole('driver')" class="btn">Continue as Driver</button>
+            <button onclick="selectRole('owner')" class="btn">Continue as Owner</button>
         </div>
     </div>
     <script>
-    // Generate a unique tab ID
     const tabId = Date.now().toString() + Math.random().toString(36).substr(2, 9);
     sessionStorage.setItem('tab_id', tabId);
-
     document.getElementById('login-form').addEventListener('submit', async function(event) {
-        event.preventDefault();  // Prevent default form submission
-
+        event.preventDefault();
         const data = {
             username: document.getElementById('username').value,
             password: document.getElementById('password').value,
         };
-
         try {
             const response = await fetch(`/api/login/?tab_id=${tabId}`, {
                 method: 'POST',
@@ -182,32 +61,23 @@
                     'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]')?.value || '',
                 },
                 body: JSON.stringify(data),
-                credentials: 'include'  // Ensures session cookie is sent with the request
+                credentials: 'include'
             });
-
             const responseData = await response.json();
             console.log("Response Data:", responseData);
-
             if (response.status === 200) {
-                // Update CSRF token if provided
                 if (responseData.csrf_token) {
                     document.cookie = `csrftoken=${responseData.csrf_token}; path=/; SameSite=Lax`;
                     console.log("Updated CSRF token:", responseData.csrf_token);
                 }
-
-                // Store user session data in sessionStorage
                 sessionStorage.setItem("user", JSON.stringify(responseData));
-
-                // Handle role-based redirection
                 const roles = responseData.roles || [];
-
                 if (roles.includes("driver") && roles.includes("owner")) {
-                    // Show role selection modal instead of redirecting
                     document.getElementById("roleSelectionModal").style.display = "block";
                 } else if (roles.includes("driver")) {
-                    window.location.href = `{% url 'user_dashboard' %}?tab_id=${tabId}`;  // Redirect to Driver's home page
+                    window.location.href = `{% url 'user_dashboard' %}?tab_id=${tabId}`;
                 } else if (roles.includes("owner")) {
-                    window.location.href = `{% url 'owner_dashboard' %}?tab_id=${tabId}`;  // Redirect to Owner's home page
+                    window.location.href = `{% url 'owner_dashboard' %}?tab_id=${tabId}`;
                 } else {
                     alert("No valid roles found. Please contact support.");
                 }
@@ -219,8 +89,6 @@
             alert("Login failed due to a server error.");
         }
     });
-
-    // Handle role selection
     function selectRole(role) {
         const tabId = sessionStorage.getItem('tab_id');
         if (role === "driver") {
@@ -230,5 +98,8 @@
         }
     }
     </script>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </body>
 </html>

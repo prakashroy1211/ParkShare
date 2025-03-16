@@ -5,225 +5,131 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sign Up | ParkShare</title>
-    <style>
-        /* General Styling */
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            background-color: #f8f8f8;
-        }
-
-        /* Main Container */
-        .container {
-            display: flex;
-            width: 90%;
-            max-width: 1200px;
-            background-color: #fff;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-            border-radius: 8px;
-        }
-
-        /* Left Side (Image) */
-        .left {
-            flex: 1;
-            background: url('{% static "images/frame.png" %}') no-repeat center center;
-            background-size: contain;
-        }
-
-        /* Right Side (Form) */
-        .right {
-            flex: 1;
-            padding: 40px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-        }
-
-        .right h2 {
-            font-size: 28px;
-            margin-bottom: 10px;
-        }
-
-        .right p {
-            font-size: 16px;
-            color: #555;
-            margin-bottom: 20px;
-        }
-
-        /* Form Inputs */
-        .form-group {
-            display: flex;
-            gap: 15px;
-            margin-bottom: 15px;
-        }
-
-        .form-group input {
-            flex: 1;
-            padding: 10px 15px;
-            font-size: 16px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            background-color: #f9f9f9;
-        }
-
-        /* Role Dropdown */
-        .form-group select {
-            flex: 1;
-            padding: 10px 15px;
-            font-size: 16px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            background-color: #f9f9f9;
-        }
-
-        /* Button */
-        .btn {
-            width: 100%;
-            padding: 10px;
-            background-color: #d90429;
-            color: #fff;
-            font-size: 16px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-
-        .btn:hover {
-            background-color: #b00322;
-        }
-
-        /* Links */
-        .links {
-            text-align: center;
-            margin-top: 15px;
-        }
-
-        .links a {
-            text-decoration: none;
-            color: #d90429;
-            font-weight: bold;
-        }
-
-        .links a:hover {
-            text-decoration: underline;
-        }
-    </style>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/signup.css' %}">
 </head>
 <body>
-    <div class="container">
-        <!-- Left Side -->
-        <div class="left"></div>
-
-        <!-- Right Side -->
-        <div class="right">
-            <h2>Sign up now</h2>
-            <p>Fill in the form below to get instant access</p>
-
-            <form id="signup-form">
-                {% csrf_token %}
-                <div class="form-group">
-                    <input type="text" id="first_name" placeholder="First Name" required>
-                    <input type="text" id="last_name" placeholder="Last Name" required>
+    <div class="container d-flex justify-content-center align-items-center min-vh-100">
+        <div class="row justify-content-center w-100">
+            <div class="col-12 col-md-8 col-lg-6 right text-center">
+                <h2>Sign up now</h2>
+                <p>Fill in the form below to get instant access</p>
+                <form id="signup-form" class="w-100">
+                    {% csrf_token %}
+                    <div class="form-group mb-3">
+                        <div class="row">
+                            <div class="col-12 col-md-6">
+                                <input type="text" id="first_name" placeholder="First Name" required>
+                            </div>
+                            <div class="col-12 col-md-6">
+                                <input type="text" id="last_name" placeholder="Last Name" required>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group mb-3">
+                        <div class="row">
+                            <div class="col-12">
+                                <input type="email" id="username" placeholder="Email" required>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group mb-3">
+                        <div class="row">
+                            <div class="col-12">
+                                <input type="text" id="phone_number" placeholder="Phone Number" required>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group mb-3">
+                        <div class="row">
+                            <div class="col-12 col-md-6">
+                                <input type="password" id="password" placeholder="Password" required>
+                            </div>
+                            <div class="col-12 col-md-6">
+                                <input type="password" id="confirm_password" placeholder="Confirm Password" required>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group mb-3">
+                        <div class="row">
+                            <div class="col-12">
+                                <select id="role">
+                                    <option value="driver">Driver</option>
+                                    <option value="owner">Owner</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn">Sign Up</button>
+                </form>
+                <div class="links text-center mt-3">
+                    <p>or</p>
+                    <a href="{% url 'login' %}">Log in here</a>
                 </div>
-                <div class="form-group">
-                    <input type="email" id="username" placeholder="Email" required>
-                </div>
-                <div class="form-group">
-                    <input type="text" id="phone_number" placeholder="Phone Number" required>
-                </div>
-                <div class="form-group">
-                    <input type="password" id="password" placeholder="Password" required>
-                    <input type="password" id="confirm_password" placeholder="Confirm Password" required>
-                </div>
-                <div class="form-group">
-                    <select id="role">
-                        <option value="driver">Driver</option>
-                        <option value="owner">Owner</option>
-                    </select>
-                </div>
-                <button type="submit" class="btn">Sign Up</button>
-            </form>
-
-            <!-- Login Link -->
-            <div class="links">
-                <p>or</p>
-                <a href="{% url 'login' %}">Log in here</a>
             </div>
         </div>
     </div>
-
     <script>
     document.getElementById('signup-form').addEventListener('submit', function(event) {
-    event.preventDefault();  // Prevent the default form submission
-    console.log("Form submitted!");  // Debugging: Check if the form submission is triggered
-
-    // Collect form data
-    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
-    console.log("CSRF Token:", csrfToken);  // Debugging: Check if the CSRF token is being fetched
-
-    const password = document.getElementById('password').value;
-    const confirmPassword = document.getElementById('confirm_password').value;
-
-    // Validate if password and confirm password match
-    if (password !== confirmPassword) {
-        alert("Passwords do not match. Please try again.");
-        return;  // Stop the form submission if passwords don't match
-    }
-
-    const data = {
-        first_name: document.getElementById('first_name').value,
-        last_name: document.getElementById('last_name').value,
-        username: document.getElementById('username').value,  // Use email as username
-        phone_number: document.getElementById('phone_number').value,
-        password: password,
-        confirm_password: confirmPassword,
-        role: document.getElementById('role').value,
-    };
-    console.log("Form Data:", data);  // Debugging: Check if the form data is being collected
-
-    // Send the POST request
-    fetch('/api/register/', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRFToken': csrfToken,
-        },
-        body: JSON.stringify(data),
-    })
-    .then(response => {
-    if (!response.ok) {
-        return response.json().then(data => {
-            // If the response is not OK, show the error message(s) in an alert
-            let errorMessage = "Registration failed due to the following errors:\n";
-            if (data.error) {
-                errorMessage += `${data.error}\n`;
-            }
-            if (data.errors) {
-                for (const field in data.errors) {
-                    data.errors[field].forEach(error => {
-                        errorMessage += `${field}: ${error}\n`;
-                    });
-                }
-            }
-            alert(errorMessage.trim());  // Display the error message(s) in an alert
-        });
-} else {
-            // No errors, registration successful
-            console.log('Success:', data);
-            alert('Registration successful!');
-            window.location.href = "{% url 'login' %}";  // Redirect to login page
+        event.preventDefault();
+        console.log("Form submitted!");
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+        console.log("CSRF Token:", csrfToken);
+        const password = document.getElementById('password').value;
+        const confirmPassword = document.getElementById('confirm_password').value;
+        if (password !== confirmPassword) {
+            alert("Passwords do not match. Please try again.");
+            return;
         }
-    })
-    .catch((error) => {
-        console.error('Error:', error);
-        alert('Registration failed due to a server error. Please try again.');
+        const data = {
+            first_name: document.getElementById('first_name').value,
+            last_name: document.getElementById('last_name').value,
+            username: document.getElementById('username').value,
+            phone_number: document.getElementById('phone_number').value,
+            password: password,
+            confirm_password: confirmPassword,
+            role: document.getElementById('role').value,
+        };
+        console.log("Form Data:", data);
+        fetch('/api/register/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrfToken,
+            },
+            body: JSON.stringify(data),
+        })
+        .then(response => {
+            if (!response.ok) {
+                return response.json().then(data => {
+                    let errorMessage = "Registration failed due to the following errors:\n";
+                    if (data.error) {
+                        errorMessage += `${data.error}\n`;
+                    }
+                    if (data.errors) {
+                        for (const field in data.errors) {
+                            data.errors[field].forEach(error => {
+                                errorMessage += `${field}: ${error}\n`;
+                            });
+                        }
+                    }
+                    alert(errorMessage.trim());
+                });
+            } else {
+                console.log('Success:', data);
+                alert('Registration successful!');
+                window.location.href = "{% url 'login' %}";
+            }
+        })
+        .catch((error) => {
+            console.error('Error:', error);
+            alert('Registration failed due to a server error. Please try again.');
+        });
     });
-});
-</script>
+    </script>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </body>
 </html>
