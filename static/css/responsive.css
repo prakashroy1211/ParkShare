@@ -1,0 +1,95 @@
+/* Global styles */
+body {
+    padding-top: 70px; /* Ensure spacing for the fixed navbar */
+    background-color: #f8f9fa;
+    overflow-x: hidden; /* Prevent horizontal scroll */
+    height: 100%;
+}
+
+html {
+    height: 100%;
+}
+
+/* Navbar adjustments */
+.navbar {
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Container adjustments */
+.container {
+    margin-top: 80px; /* Adjust based on navbar height */
+}
+
+/* Responsive font size for headers */
+h1 {
+    font-size: 2.5rem;
+}
+
+h2 {
+    font-size: 2rem;
+}
+
+/* Adjust text size and responsiveness for smaller screens */
+@media (max-width: 768px) {
+    h1 {
+        font-size: 2rem;
+    }
+
+    h2 {
+        font-size: 1.5rem;
+    }
+
+    .feature {
+        text-align: center;
+    }
+}
+
+@media (max-width: 576px) {
+    h1 {
+        font-size: 1.5rem;
+    }
+
+    h2 {
+        font-size: 1.2rem;
+    }
+
+    .logo {
+        max-width: 100%;
+        height: auto;
+    }
+}
+
+/* Make features section responsive */
+.features {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-around;
+}
+
+.feature {
+    width: 30%;
+    margin: 10px;
+}
+
+@media (max-width: 768px) {
+    .feature {
+        width: 100%;
+        text-align: center;
+    }
+}
+
+/* Footer styling */
+footer {
+    text-align: center;
+    padding: 20px 0;
+    background-color: #f8f9fa;
+    position: relative;
+    bottom: 0;
+    width: 100%;
+}
+
+/* Image responsiveness */
+img {
+    max-width: 100%;
+    height: auto;
+}

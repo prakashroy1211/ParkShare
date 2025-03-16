@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>View Parking Spaces</title>
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <style>
+        #map {
+            height: 500px;
+            width: 100%;
+        }
+        .info-window {
+            font-family: Arial, sans-serif;
+            font-size: 14px;
+        }
+        .info-window h3 {
+            margin: 0;
+            font-size: 16px;
+            color: #007bff;
+        }
+        .info-window p {
+            margin: 4px 0;
+        }
+        .info-window .btn {
+            padding: 8px 16px;
+            background-color: #007bff;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+        .info-window .btn:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <h1>Available Parking Spaces</h1>
+    <div id="map"></div>
+
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script>
+        // Initialize the map
+        var map = L.map('map').setView([10.8505, 76.2711], 10);  // Default center (Kerala, India)
+
+        // Set the map tile layer (OpenStreetMap tiles)
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+
+        // Custom Icons for Parking Spaces
+        var availableIcon = L.icon({
+            iconUrl: 'https://cdn-icons-png.flaticon.com/512/684/684908.png', // Green icon for available spaces
+            iconSize: [30, 30],
+            iconAnchor: [15, 15],
+            popupAnchor: [0, -15],
+        });
+
+        var unavailableIcon = L.icon({
+            iconUrl: 'https://cdn-icons-png.flaticon.com/512/684/684908.png', // Red icon for unavailable spaces
+            iconSize: [30, 30],
+            iconAnchor: [15, 15],
+            popupAnchor: [0, -15],
+        });
+
+
+        // Loop through parking spaces and add markers with respective icons
+        parkingSpaces.forEach(function(space) {
+            // Choose the icon based on availability
+            var markerIcon = space.available ? availableIcon : unavailableIcon;
+
+            var marker = L.marker([space.latitude, space.longitude], { icon: markerIcon }).addTo(map);
+            
+            // Info window content for each marker
+            var infoContent = `
+                <div class="info-window">
+                    <h3>${space.name}</h3>
+                    <p><strong>Location:</strong> ${space.location}</p>
+                    <p><strong>Price:</strong> ₹${space.price}/hour</p>
+                    <p><strong>Status:</strong> ${space.available ? 'Available' : 'Not Available'}</p>
+                    <a href="/book/${space.id}/" class="btn">Book Now</a>
+                </div>
+            `;
+
+            // Bind the info window to the marker
+            marker.bindPopup(infoContent);
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,524 @@
+<!-- core/templates/core/user_dashboard.html -->
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ParkShare - Dashboard</title>
+    <style>
+        /* General Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            background-color: #f9f9f9;
+            display: flex;
+        }
+
+        /* Left Navigation Bar */
+        .nav-bar {
+            width: 220px;
+            background-color: #d90429;
+            padding: 20px;
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            color: white;
+            font-size: 18px;
+        }
+
+        .nav-bar h2 {
+            margin-bottom: 20px;
+            color: white;
+            font-size: 24px;
+        }
+
+        .nav-bar a {
+            color: white;
+            text-decoration: none;
+            display: block;
+            padding: 10px 0;
+            font-size: 16px;
+            margin-bottom: 15px;
+            transition: background-color 0.3s;
+        }
+
+        .nav-bar a:hover {
+            background-color: #a70321;
+            padding-left: 15px;
+        }
+
+        .nav-bar .active {
+            background-color: #a70321;
+            padding-left: 15px;
+        }
+
+        /* Dashboard Layout */
+        .dashboard-content {
+            margin-left: 240px;
+            width: 100%;
+            padding: 20px;
+        }
+
+        /* Top Bar */
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .top-bar input[type="text"] {
+            padding: 8px 15px;
+            font-size: 16px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+            width: 300px;
+        }
+
+        .top-bar button {
+            background-color: #d90429;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 10px 20px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .top-bar button:hover {
+            background-color: #a70321;
+        }
+
+        /* Profile Button */
+        .profile-btn {
+            background-color: #d90429;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        .profile-btn:hover {
+            background-color: #a70321;
+        }
+
+        /* Available Parking Slots */
+        .available-parking {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .available-parking h3 {
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .parking-slot {
+            padding: 10px;
+            background-color: #f4f4f4;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .parking-slot button {
+            padding: 5px 10px;
+            border: none;
+            border-radius: 5px;
+            color: white;
+            cursor: pointer;
+        }
+
+        .parking-slot button.available {
+            background-color: green;
+        }
+
+        .parking-slot button.unavailable {
+            background-color: red;
+            cursor: not-allowed;
+        }
+
+        /* Map Section */
+        .map-section {
+            background-color: #fff;
+            border-radius: 5px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            height: 300px;
+            position: relative;
+        }
+
+        #map {
+            height: 100%;
+            width: 100%;
+        }
+
+        /* Flexbox Layout */
+        .content-wrapper {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .left-section, .right-section {
+            width: 48%;
+        }
+        .logout-container {
+            display: flex;
+            justify-content: flex-end;
+            padding: 10px;
+        }
+        .logout-btn {
+            background-color: #d90429;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        .logout-btn:hover {
+            background-color: #a70321;
+        }
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            position: absolute;
+            top: 10px;
+            right: 10px;
+        }
+        .user-profile img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+        }
+    </style>
+
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+</head>
+<body>
+    <!-- Left Navigation Bar -->
+    <div class="nav-bar">
+        <h2>ParkShare</h2>
+        <a href="#">View Reservations</a>
+        <a href="#">View Profile</a>
+    </div>
+
+    <!-- Dashboard Content -->
+    <div class="dashboard-content">
+        <!-- Top Bar with Search and Profile -->
+        <div class="top-bar">
+            <div class="search-bar">
+                <input type="text" id="searchLocation" placeholder="Search Location..." />
+                <button onclick="searchLocation()">Search</button>
+            </div>
+            
+            <div class="user-profile">
+                <img src="{% static 'images/user.png' %}" alt="User">
+                <span>{{ user.username }}</span>
+            </div>
+        </div>
+        <div class="logout-container">
+            <form id="logout-form" method="POST" action="{% url 'logout' %}?tab_id={{ request.GET.tab_id|default:'default' }}">
+                {% csrf_token %}
+                <button type="submit" class="logout-btn">Logout</button>
+            </form>
+        </div>
+        <!-- Dashboard Content Wrapper -->
+        <div class="content-wrapper">
+            <!-- Left Section: Available Parking Slots -->
+            <div class="left-section">
+                <div class="available-parking" id="parkingSlots">
+                    <h3>Available Parking Lots</h3>
+                    <!-- Parking slots will be dynamically added here -->
+                </div>
+            </div>
+            <!-- Right Section: Map Section with Leaflet -->
+            <div class="right-section">
+                <div class="map-section" id="mapContainer">
+                    <div id="map"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Get tab_id from sessionStorage or URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const tabId = sessionStorage.getItem('tab_id') || urlParams.get('tab_id') || 'default';
+        sessionStorage.setItem('tab_id', tabId); // Ensure tab_id persists
+
+        // Initialize Leaflet map
+        var map = L.map('map').setView([11.2588, 75.7804], 13);
+
+        // Add OpenStreetMap tiles
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '<a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+
+        // Add default marker
+        L.marker([11.2588, 75.7804]).addTo(map)
+            .bindPopup("Kozhikode, Kerala")
+            .openPopup();
+
+        // Search Location Function
+        function searchLocation() {
+            const searchQuery = document.getElementById('searchLocation').value;
+            if (searchQuery) {
+                const geocodeUrl = `https://nominatim.openstreetmap.org/search?format=json&q=${searchQuery}`;
+                
+                fetch(geocodeUrl)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data && data.length > 0) {
+                            const lat = data[0].lat;
+                            const lon = data[0].lon;
+                            map.setView([lat, lon], 13);
+                            L.marker([lat, lon]).addTo(map)
+                                .bindPopup(`${searchQuery}`)
+                                .openPopup();
+                        } else {
+                            alert("Location not found");
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error searching location:', error);
+                        alert("Error searching location");
+                    });
+            }
+        }
+
+        // Fetch all parking lots on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            fetch(`/api/list-all-parking-lots/?tab_id=${tabId}`, {
+                method: 'GET',
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken') || document.querySelector('[name=csrfmiddlewaretoken]')?.value,
+                },
+                credentials: 'include'
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.status === 'success') {
+                    displayParkingLots(data.parking_lots);
+                } else {
+                    console.error('Error fetching parking lots:', data.message);
+                    document.getElementById('parkingSlots').innerHTML += '<p>No parking lots available.</p>';
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching parking lots:', error);
+                document.getElementById('parkingSlots').innerHTML += '<p>Error loading parking lots: ' + error.message + '</p>';
+            });
+        });
+
+        // Display parking lots in the UI
+        function displayParkingLots(parkingLots) {
+            const parkingSlotsContainer = document.getElementById('parkingSlots');
+            parkingSlotsContainer.innerHTML = '<h3>Available Parking Lots</h3>'; // Reset content
+
+            if (parkingLots.length === 0) {
+                parkingSlotsContainer.innerHTML += '<p>No parking lots available.</p>';
+                return;
+            }
+
+            parkingLots.forEach(lot => {
+                const slotDiv = document.createElement('div');
+                slotDiv.className = 'parking-slot';
+                slotDiv.id = `parking-slot-${lot.id}`; // Add ID for easy updates
+                slotDiv.innerHTML = `
+                    <div>
+                        <strong>${lot.lot_name}</strong><br>
+                        Location: ${lot.location}<br>
+                        Vehicle Type: ${lot.vehicle_type}<br>
+                        Capacity: <span id="capacity-${lot.id}">${lot.vehicle_capacity}</span><br>
+                        Price per Hour: $${lot.price_per_hour}
+                    </div>
+                    <button onclick="reserveParkingLot(${lot.id})"
+                            class="${lot.vehicle_capacity > 0 ? 'available' : 'unavailable'}"
+                            ${lot.vehicle_capacity <= 0 ? 'disabled' : ''}>
+                        Reserve
+                    </button>
+                `;
+                parkingSlotsContainer.appendChild(slotDiv);
+
+                // Add marker to the map
+                if (lot.location) {
+                    fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${lot.location}`)
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data && data.length > 0) {
+                                const lat = data[0].lat;
+                                const lon = data[0].lon;
+                                L.marker([lat, lon]).addTo(map)
+                                    .bindPopup(`<b>${lot.lot_name}</b><br>${lot.location}<br>Capacity: ${lot.vehicle_capacity}`)
+                                    .on('click', () => map.setView([lat, lon], 13));
+                            }
+                        })
+                        .catch(error => console.error(`Error geocoding ${lot.location}:`, error));
+                }
+            });
+        }
+
+        // Reserve a parking lot
+        async function reserveParkingLot(parkingLotId) {
+            try {
+                // Fetch a fresh CSRF token
+                let csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value || getCookie("csrftoken");
+                const freshCsrfToken = await fetchCsrfToken();
+                if (freshCsrfToken) {
+                    csrfToken = freshCsrfToken;
+                }
+
+                if (!csrfToken) {
+                    throw new Error("CSRF token missing. Please refresh the page and try again.");
+                }
+
+                const response = await fetch(`/api/reserve-parking-lot/?tab_id=${tabId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': csrfToken,
+                    },
+                    body: JSON.stringify({ parking_lot_id: parkingLotId }),
+                    credentials: 'include'
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                if (data.status === 'success') {
+                    alert(data.message);
+                    // Update the capacity in the UI
+                    const capacityElement = document.getElementById(`capacity-${parkingLotId}`);
+                    if (capacityElement) {
+                        capacityElement.textContent = data.updated_capacity;
+                    }
+                    // Update the button state
+                    const button = document.querySelector(`#parking-slot-${parkingLotId} button`);
+                    if (button) {
+                        if (data.updated_capacity <= 0) {
+                            button.classList.remove('available');
+                            button.classList.add('unavailable');
+                            button.disabled = true;
+                        }
+                    }
+                } else {
+                    throw new Error(data.message || 'Reservation failed');
+                }
+            } catch (error) {
+                console.error('Error reserving parking lot:', error);
+                alert(`Error reserving parking lot: ${error.message}`);
+            }
+        }
+
+        // Fetch a fresh CSRF token
+        async function fetchCsrfToken() {
+            try {
+                const response = await fetch(`/api/get-csrf-token/?tab_id=${tabId}`, {
+                    method: 'GET',
+                    credentials: 'include'
+                });
+                if (!response.ok) {
+                    throw new Error(`Failed to fetch CSRF token: ${response.status}`);
+                }
+                const data = await response.json();
+                if (data.csrf_token) {
+                    document.cookie = `csrftoken=${data.csrf_token}; path=/; SameSite=Lax`;
+                    return data.csrf_token;
+                }
+                throw new Error("CSRF token not returned");
+            } catch (error) {
+                console.error("Error fetching CSRF token:", error);
+                return null;
+            }
+        }
+
+        // Helper function to get CSRF token from cookies
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== "") {
+                const cookies = document.cookie.split(";");
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + "=")) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        // Handle logout
+        document.getElementById('logout-form').addEventListener('submit', async function(event) {
+            event.preventDefault();
+
+            try {
+                let csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value || getCookie("csrftoken");
+                const freshCsrfToken = await fetchCsrfToken();
+                if (freshCsrfToken) {
+                    csrfToken = freshCsrfToken;
+                }
+
+                if (!csrfToken) {
+                    throw new Error("CSRF token missing. Please refresh the page and try again.");
+                }
+
+                const response = await fetch(`/logout/?tab_id=${tabId}`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': csrfToken,
+                    },
+                    credentials: 'include'
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+                }
+
+                const responseData = await response.json();
+                if (responseData.message === "Logout successful") {
+                    if (responseData.csrf_token) {
+                        document.cookie = `csrftoken=${responseData.csrf_token}; path=/; SameSite=Lax`;
+                    }
+                    sessionStorage.removeItem("user");
+                    sessionStorage.removeItem("tab_id");
+                    window.location.href = `/login/?tab_id=${tabId}`;
+                } else {
+                    throw new Error(responseData.message || "Logout failed");
+                }
+            } catch (error) {
+                console.error("Error during logout:", error);
+                alert("Error during logout: " + error.message);
+            }
+        });
+    </script>
+</body>
+</html>
