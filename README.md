@@ -73,6 +73,8 @@ Follow these steps to set up ParkShare on your local machine.
    django==4.2
    djangorestframework==3.14.0
    psycopg2-binary==2.9.6
-<br/>Then install the dependencies:
-  ```bash
-   pip install -r requirements.txt
+
+  <br/>Then install the dependencies:
+    ```bash
+    
+    pip install -r requirements.txt
