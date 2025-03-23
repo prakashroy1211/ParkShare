@@ -30,3 +30,13 @@ class ParkingLot(models.Model):
 
     def __str__(self):
         return self.lot_name
+        
+class Reservation(models.Model):
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    parking_lot = models.ForeignKey(ParkingLot, on_delete=models.CASCADE)
+    status = models.CharField(max_length=20, default='Active')
+    created_at = models.DateTimeField(auto_now_add=True)
+    slot_number = models.CharField(max_length=10, null=True, blank=True)
+    start_time = models.DateTimeField(null=True, blank=True)
+    end_time = models.DateTimeField(null=True, blank=True)
+    vehicle_id = models.BigIntegerField(null=True, blank=True)

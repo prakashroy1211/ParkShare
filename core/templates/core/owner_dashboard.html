@@ -10,7 +10,7 @@
 </head>
 <body>
     <!-- CSRF Token at the Top -->
-    <input type="hidden" name="csrfmiddlewaretoken" value="{% csrf_token %}" id="csrf-token">
+    <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}" id="csrf-token">
 
     <!-- Sidebar -->
     <div class="nav-bar">
@@ -115,6 +115,7 @@
     }
 
     // Show/Hide Add Parking Lot Modal
+    console.log('Defining showAddParkingLotModal');
     function showAddParkingLotModal() {
         document.getElementById('add-parking-lot-modal').style.display = 'flex';
     }
@@ -125,25 +126,35 @@
 
     // Get CSRF Token with Debugging
     function getCsrfToken() {
-        let token = document.querySelector('#csrf-token')?.value;
-        if (token) {
-            console.log('CSRF token from DOM:', token, 'Length:', token.length);
-        } else {
-            console.warn('CSRF token not found in DOM, trying cookie...');
-            token = getCookie('csrftoken');
-            if (token) {
-                console.log('CSRF token from cookie:', token, 'Length:', token.length);
-            } else {
-                console.error('No CSRF token found in DOM or cookie');
-                throw new Error('No CSRF token available');
-            }
+    const tabId = sessionStorage.getItem('tab_id') || urlParams.get('tab_id') || 'default';
+    const csrfCookieName = `csrftoken_${tabId}`;
+
+    // Try DOM first
+    let token = document.querySelector('#csrf-token')?.value;
+    if (token) {
+        console.log(`CSRF token from DOM for tab ${tabId}: ${token}, Length: ${token.length}`);
+        if (token.length === 64) {
+            return token;
         }
-        if (token.length !== 64) {
-            console.error('CSRF token length is incorrect:', token.length, 'Token:', token);
-            throw new Error('CSRF token length is incorrect');
-        }
-        return token;
+        console.warn(`DOM token length invalid (${token.length}), falling back to cookie...`);
+    } else {
+        console.warn(`CSRF token not found in DOM for tab ${tabId}, falling back to cookie...`);
     }
+
+    // Fallback to cookie
+    token = getCookie(csrfCookieName);
+    if (token) {
+        console.log(`CSRF token from cookie ${csrfCookieName}: ${token}, Length: ${token.length}`);
+        if (token.length === 64) {
+            return token;
+        }
+        console.error(`Cookie token length invalid (${token.length}): ${token}`);
+    } else {
+        console.error(`No CSRF token found in cookie ${csrfCookieName}`);
+    }
+
+    throw new Error('CSRF token length is incorrect or missing');
+}
 
     // Helper function to get cookie value
     function getCookie(name) {
@@ -314,7 +325,7 @@
             const response = await fetch(`/logout/?tab_id=${tabId}`, {
                 method: 'POST',
                 headers: {
-                    'X-CSRFToken': csrfToken,
+                    'X-CSRFToken': getCsrfToken(),
                 },
                 credentials: 'include'
             });

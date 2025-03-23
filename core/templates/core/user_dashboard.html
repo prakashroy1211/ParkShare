@@ -18,7 +18,7 @@
     <!-- Left Navigation Bar -->
     <div class="nav-bar">
         <h2>ParkShare</h2>
-        <a href="#">View Reservations</a>
+        <a href="{% url 'view_reservations' %}?tab_id={{ request.GET.tab_id|default:'default' }}">View Reservations</a>
         <a href="#">View Profile</a>
     </div>
 
@@ -156,7 +156,7 @@
                         Capacity: <span id="capacity-${lot.id}">${lot.vehicle_capacity}</span><br>
                         Price per Hour: $${lot.price_per_hour}
                     </div>
-                    <button onclick="reserveParkingLot(${lot.id})"
+                    <button onclick="reserveParkingLot(${lot.id}, '${lot.lot_name.replace(/'/g, "\\'")}', '${lot.location.replace(/'/g, "\\'")}')"
                             class="${lot.vehicle_capacity > 0 ? 'available' : 'unavailable'}"
                             ${lot.vehicle_capacity <= 0 ? 'disabled' : ''}>
                         Reserve
@@ -183,59 +183,74 @@
         }
 
         // Reserve a parking lot
-        async function reserveParkingLot(parkingLotId) {
-            try {
-                // Fetch a fresh CSRF token
-                let csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value || getCookie("csrftoken");
-                const freshCsrfToken = await fetchCsrfToken();
-                if (freshCsrfToken) {
-                    csrfToken = freshCsrfToken;
-                }
-
-                if (!csrfToken) {
-                    throw new Error("CSRF token missing. Please refresh the page and try again.");
-                }
-
-                const response = await fetch(`/api/reserve-parking-lot/?tab_id=${tabId}`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRFToken': csrfToken,
-                    },
-                    body: JSON.stringify({ parking_lot_id: parkingLotId }),
-                    credentials: 'include'
-                });
-
-                if (!response.ok) {
-                    const errorData = await response.json();
-                    throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
-                }
-
-                const data = await response.json();
-                if (data.status === 'success') {
-                    alert(data.message);
-                    // Update the capacity in the UI
-                    const capacityElement = document.getElementById(`capacity-${parkingLotId}`);
-                    if (capacityElement) {
-                        capacityElement.textContent = data.updated_capacity;
-                    }
-                    // Update the button state
-                    const button = document.querySelector(`#parking-slot-${parkingLotId} button`);
-                    if (button) {
-                        if (data.updated_capacity <= 0) {
-                            button.classList.remove('available');
-                            button.classList.add('unavailable');
-                            button.disabled = true;
-                        }
-                    }
-                } else {
-                    throw new Error(data.message || 'Reservation failed');
-                }
-            } catch (error) {
-                console.error('Error reserving parking lot:', error);
-                alert(`Error reserving parking lot: ${error.message}`);
-            }
+       async function reserveParkingLot(parkingLotId, lotName, location) {
+    console.log('Attempting to reserve:', { parkingLotId, lotName, location });
+    try {
+        let csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value || getCookie("csrftoken");
+        console.log('Initial CSRF token:', csrfToken);
+        const freshCsrfToken = await fetchCsrfToken();
+        if (freshCsrfToken) {
+            csrfToken = freshCsrfToken;
+            console.log('Fetched fresh CSRF token:', csrfToken);
         }
+        if (!csrfToken) {
+            throw new Error("CSRF token missing. Please refresh the page and try again.");
+        }
+
+        console.log('Sending reservation request for parkingLotId:', parkingLotId);
+        const response = await fetch(`/api/reserve-parking-lot/?tab_id=${tabId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrfToken,
+            },
+            body: JSON.stringify({ parking_lot_id: parkingLotId }),
+            credentials: 'include'
+        });
+
+        console.log('Response status:', response.status);
+        const data = await response.json(); // Parse JSON regardless of status for better error handling
+        console.log('Response data:', data);
+
+        if (!response.ok) {
+            throw new Error(data.message || `HTTP error! status: ${response.status}`);
+        }
+
+        if (data.status === 'success') {
+            alert(data.message);
+            const capacityElement = document.getElementById(`capacity-${parkingLotId}`);
+            if (capacityElement) {
+                capacityElement.textContent = data.updated_capacity;
+                console.log('Updated capacity to:', data.updated_capacity);
+            }
+            const button = document.querySelector(`#parking-slot-${parkingLotId} button`);
+            if (button) {
+                if (data.updated_capacity <= 0) {
+                    button.className = 'unavailable';
+                    button.disabled = true;
+                    console.log('Button disabled due to no capacity');
+                }
+            }
+
+            const reservation = {
+                id: parkingLotId,
+                lot_name: lotName,
+                location: location,
+                timestamp: new Date().toISOString(),
+                status: 'Active'
+            };
+            let reservations = JSON.parse(sessionStorage.getItem('reservations') || '[]');
+            reservations.push(reservation);
+            sessionStorage.setItem('reservations', JSON.stringify(reservations));
+            console.log('Stored reservation locally:', reservation);
+        } else {
+            throw new Error(data.message || 'Reservation failed');
+        }
+    } catch (error) {
+        console.error('Reservation failed with error:', error);
+        alert(`Error reserving parking lot: ${error.message}`);
+    }
+}
 
         // Fetch a fresh CSRF token
         async function fetchCsrfToken() {
@@ -310,6 +325,7 @@
                     }
                     sessionStorage.removeItem("user");
                     sessionStorage.removeItem("tab_id");
+                    sessionStorage.removeItem("reservations"); // Clear reservations on logout
                     window.location.href = `/login/?tab_id=${tabId}`;
                 } else {
                     throw new Error(responseData.message || "Logout failed");

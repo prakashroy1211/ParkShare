@@ -9,7 +9,7 @@ from django.contrib.auth import authenticate, login, logout
 import logging
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
-from .models import CustomUser, ParkingLot
+from .models import CustomUser, ParkingLot, Reservation
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
 from django.views.decorators.csrf import csrf_protect
@@ -19,45 +19,42 @@ from django.contrib.sessions.backends.db import SessionStore
 
 logger = logging.getLogger(__name__)
 
-# Custom middleware to handle tab-specific session cookies
 def tab_specific_session_middleware(get_response):
     def middleware(request):
-        # Get the tab_id from the query parameter
         tab_id = request.GET.get('tab_id', 'default')
         session_cookie_name = f"sessionid_{tab_id}"
+        csrf_cookie_name = f"csrftoken_{tab_id}"
 
-        # Log the initial state
-        logger.info(f"Middleware processing for tab {tab_id}, cookies: {request.COOKIES}")
-
-        # Use the tab-specific session cookie if it exists
         if session_cookie_name in request.COOKIES:
             session_key = request.COOKIES[session_cookie_name]
-            logger.info(f"Loading session for tab {tab_id} with session_key: {session_key}")
             request.session = SessionStore(session_key=session_key)
+            logger.info(f"Loaded session for tab {tab_id}: {session_key}")
         else:
-            logger.info(f"No session cookie found for tab {tab_id}, creating new session")
             request.session = SessionStore()
             request.session.create()
-            session_key = request.session.session_key
-            logger.info(f"Created new session for tab {tab_id}, session_key: {session_key}")
+            logger.info(f"Created session for tab {tab_id}: {request.session.session_key}")
 
-        # Process the request
         response = get_response(request)
 
-        # Save the session and set the custom session cookie
-        try:
-            if hasattr(request, 'session') and request.session.session_key:
-                response.set_cookie(
-                    session_cookie_name,
-                    request.session.session_key,
-                    httponly=True,
-                    samesite='Lax',
-                    expires=timezone.now() + timezone.timedelta(days=1)
-                )
-                logger.info(f"Set cookie {session_cookie_name} with session_key: {request.session.session_key}")
-        except Exception as e:
-            logger.error(f"Error setting session cookie for tab {tab_id}: {str(e)}", exc_info=True)
-
+        if hasattr(request, 'session') and request.session.session_key:
+            response.set_cookie(
+                session_cookie_name,
+                request.session.session_key,
+                httponly=True,
+                samesite='Lax',
+                expires=timezone.now() + timezone.timedelta(days=1)
+            )
+            csrf_token = get_token(request)
+            if len(csrf_token) != 64:
+                logger.error(f"Generated CSRF token length invalid: {len(csrf_token)}, Token: {csrf_token}")
+            response.set_cookie(
+                csrf_cookie_name,
+                csrf_token,
+                httponly=False,
+                samesite='Lax',
+                expires=timezone.now() + timezone.timedelta(days=1)
+            )
+            logger.info(f"Set cookies: {session_cookie_name}={request.session.session_key}, {csrf_cookie_name}={csrf_token}, Length: {len(csrf_token)}")
         return response
     return middleware
 
@@ -295,14 +292,24 @@ class ReserveParkingLotAPIView(APIView):
                 logger.error("No available slots")
                 return Response({"status": "error", "message": "No available slots in this parking lot."}, status=status.HTTP_400_BAD_REQUEST)
 
+            # Decrease capacity and save
             parking_lot.vehicle_capacity -= 1
             parking_lot.save()
-            logger.info(f"Reserved parking lot: {parking_lot.lot_name}, new capacity: {parking_lot.vehicle_capacity}")
+            logger.info(f"Updated parking lot: {parking_lot.lot_name}, new capacity: {parking_lot.vehicle_capacity}")
+
+            # Create reservation
+            reservation = Reservation.objects.create(
+                user=request.user,
+                parking_lot=parking_lot,
+                status='Active'
+            )
+            logger.info(f"Reservation created: ID={reservation.id}, User={request.user.username}, Lot={parking_lot.lot_name}")
 
             return Response({
                 "status": "success",
                 "message": f"Successfully reserved a slot in {parking_lot.lot_name}.",
-                "updated_capacity": parking_lot.vehicle_capacity
+                "updated_capacity": parking_lot.vehicle_capacity,
+                "reservation_id": reservation.id  # Optional: return reservation ID for frontend use
             }, status=status.HTTP_200_OK)
         except ParkingLot.DoesNotExist:
             logger.error(f"Parking lot {parking_lot_id} not found")
@@ -310,6 +317,23 @@ class ReserveParkingLotAPIView(APIView):
         except Exception as e:
             logger.error(f"Error reserving parking lot: {str(e)}", exc_info=True)
             return Response({"status": "error", "message": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+class UserReservationsAPIView(APIView):
+    def get(self, request):
+        if not request.user.is_authenticated:
+            logger.warning("Unauthenticated request to view reservations")
+            return Response({"status": "error", "message": "You must be logged in to view reservations."}, status=status.HTTP_401_UNAUTHORIZED)
+        logger.info(f"Fetching reservations for user: {request.user.username}")
+        reservations = Reservation.objects.filter(user=request.user)
+        logger.info(f"Found {reservations.count()} reservations for user: {request.user.username}")
+        data = [{
+            "id": res.id,
+            "lot_name": res.parking_lot.lot_name,
+            "location": res.parking_lot.location,
+            "timestamp": res.created_at.isoformat(),
+            "status": res.status
+        } for res in reservations]
+        return Response({"status": "success", "reservations": data})
 
 class EditParkingLotAPIView(APIView):
     def post(self, request):
@@ -416,6 +440,10 @@ def signup_view(request):
 
 def login_view(request):
     return render(request, 'core/login.html')
+    
+@login_required
+def view_reservations(request):
+    return render(request, 'core/view_reservations.html', {'user': request.user})
 
 @require_POST
 @csrf_protect
@@ -451,10 +479,21 @@ def driver_home_view(request):
 def owner_home_view(request):
     try:
         parking_lots = ParkingLot.objects.filter(owner=request.user)
-        return render(request, 'core/owner_dashboard.html', {'parking_lots': parking_lots})
+        csrf_token = get_token(request)  # Get a fresh 64-char token
+        logger.info(f"Generated CSRF token for tab {request.GET.get('tab_id', 'default')}: {csrf_token}, Length: {len(csrf_token)}")
+        return render(request, 'core/owner_dashboard.html', {
+            'parking_lots': parking_lots,
+            'csrf_token': csrf_token  # Pass it explicitly
+        })
     except Exception as e:
         print(f"Error fetching parking lots: {str(e)}")
-        return render(request, 'core/owner_dashboard.html', {'parking_lots': [], 'error': str(e)})
+        csrf_token = get_token(request)
+        logger.info(f"Generated CSRF token (error case) for tab {request.GET.get('tab_id', 'default')}: {csrf_token}, Length: {len(csrf_token)}")
+        return render(request, 'core/owner_dashboard.html', {
+            'parking_lots': [],
+            'error': str(e),
+            'csrf_token': csrf_token
+        })
 
 @login_required
 def role_selection_view(request):

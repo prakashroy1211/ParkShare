@@ -52,6 +52,9 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'corsheaders.middleware.CorsMiddleware',
 ]
+
+CSRF_COOKIE_HTTPONLY = False  # JavaScript needs access
+CSRF_COOKIE_SAMESITE = 'Lax'
 CORS_ALLOW_ALL_ORIGINS = True
 ROOT_URLCONF = 'parkshare.urls'
 
