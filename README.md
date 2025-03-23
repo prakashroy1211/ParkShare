@@ -68,7 +68,7 @@ Follow these steps to set up ParkShare on your local machine.
    python -m venv psvenv
    source psvenv/bin/activate  # On Windows: psvenv\Scripts\activate
 3. **Install Dependencies**:
-  Create a requirements.txt file with the following content:
+  <br/>Create a requirements.txt file with the following content:
    ```bash
    django==4.2
    djangorestframework==3.14.0
