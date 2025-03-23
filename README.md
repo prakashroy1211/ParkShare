@@ -8,6 +8,7 @@
 - [Tech Stack](#tech-stack)
 - [Installation](#installation)
 - [Usage](#usage)
+- [Deployment on AWS](#deployment-on-aws)
 - [Project Structure](#project-structure)
 - [API Endpoints](#api-endpoints)
 - [Contributing](#contributing)
@@ -62,3 +63,13 @@ Follow these steps to set up ParkShare on your local machine.
    git clone https://github.com/your-username/parkshare.git
    cd parkshare
 2. **Set Up a Virtual Environment**:
+
+   ```bash
+   python -m venv psvenv
+   source psvenv/bin/activate  # On Windows: psvenv\Scripts\activate
+3. **Install Dependencies**:
+  Create a requirements.txt file with the following content:
+   ```bash
+   django==4.2
+   djangorestframework==3.14.0
+   psycopg2-binary==2.9.6
