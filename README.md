@@ -61,3 +61,4 @@ Follow these steps to set up ParkShare on your local machine.
    ```bash
    git clone https://github.com/your-username/parkshare.git
    cd parkshare
+2. **Set Up a Virtual Environment**:
