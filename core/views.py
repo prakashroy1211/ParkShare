@@ -334,6 +334,57 @@ class UserReservationsAPIView(APIView):
             "status": res.status
         } for res in reservations]
         return Response({"status": "success", "reservations": data})
+        
+        
+class OwnerReservationsAPIView(APIView):
+    def get(self, request):
+        if not request.user.is_authenticated:
+            logger.warning("Unauthenticated request to view owner reservations")
+            return Response({"status": "error", "message": "You must be logged in to view reservations."}, status=status.HTTP_401_UNAUTHORIZED)
+
+        tab_id = request.GET.get('tab_id', 'default')
+        role_key = f"current_role_{tab_id}"
+        user_roles = request.session.get(role_key, request.user.role if isinstance(request.user.role, list) else [request.user.role])
+        if "owner" not in user_roles:
+            logger.error("User does not have owner role")
+            return Response({"status": "error", "message": "Only users with the 'owner' role can view parking lot reservations."}, status=status.HTTP_403_FORBIDDEN)
+
+        # Get all parking lots owned by the user
+        owner_parking_lots = ParkingLot.objects.filter(owner=request.user)
+        if not owner_parking_lots.exists():
+            logger.info(f"No parking lots found for owner: {request.user.username}")
+            return Response({"status": "success", "reservations": []})
+
+        # Get all reservations for those parking lots
+        reservations = Reservation.objects.filter(parking_lot__in=owner_parking_lots)
+        logger.info(f"Found {reservations.count()} reservations for owner: {request.user.username}")
+
+        # Serialize the data
+        data = [{
+            "id": res.id,
+            "lot_name": res.parking_lot.lot_name,
+            "location": res.parking_lot.location,
+            "user": res.user.username,
+            "status": res.status,
+            "created_at": res.created_at.isoformat(),
+            "slot_number": res.slot_number if res.slot_number else "N/A",
+            "start_time": res.start_time.isoformat() if res.start_time else "N/A",
+            "end_time": res.end_time.isoformat() if res.end_time else "N/A",
+            "vehicle_id": res.vehicle_id if res.vehicle_id else "N/A"
+        } for res in reservations]
+
+        return Response({"status": "success", "reservations": data})
+
+# Existing owner_home_view (for reference)
+@login_required
+def owner_home_view(request):
+    parking_lots = ParkingLot.objects.filter(owner=request.user)
+    return render(request, 'core/owner_dashboard.html', {'parking_lots': parking_lots})
+
+# New view for owner reservations page
+@login_required
+def owner_reservations_view(request):
+    return render(request, 'core/owner_reservations.html', {'user': request.user})
 
 class EditParkingLotAPIView(APIView):
     def post(self, request):

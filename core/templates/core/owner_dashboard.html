@@ -16,7 +16,7 @@
     <div class="nav-bar">
         <h2>ParkShare</h2>
         <a href="{% url 'owner_dashboard' %}?tab_id={{ request.GET.tab_id|default:'default' }}" class="active">My Parking Lots</a>
-        <a href="#">Reservations</a>
+        <a href="{% url 'owner_reservations' %}?tab_id={{ request.GET.tab_id|default:'default' }}">Reservations</a>
     </div>
 
     <!-- Main Content -->
