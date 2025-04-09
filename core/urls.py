@@ -15,6 +15,9 @@ urlpatterns = [
     path('api/list-all-parking-lots/', views.ListAllParkingLotsAPIView.as_view(), name='list_all_parking_lots'),
     path('api/reserve-parking-lot/', views.ReserveParkingLotAPIView.as_view(), name='reserve_parking_lot'),
     path('api/user-reservations/', views.UserReservationsAPIView.as_view(), name='user_reservations'),
+    path('api/owner-reservations/', views.OwnerReservationsAPIView.as_view(), name='owner_reservations_api'),
+    path('api/edit-parking-lot/', views.EditParkingLotAPIView.as_view(), name='edit_parking_lot_api'),
+    path('api/delete-parking-lot/', views.DeleteParkingLotAPIView.as_view(), name='delete_parking_lot_api'),
     
     # Frontend Pages
     path('', views.home_view, name='home'),
@@ -26,4 +29,5 @@ urlpatterns = [
     path('owner_dashboard/', views.owner_home_view, name='owner_dashboard'),
     path('role-redirect/', views.role_redirect_view, name='role-redirect'),
     path('view-reservations/', views.view_reservations, name='view_reservations'),
+    path('owner_reservations/', views.owner_reservations_view, name='owner_reservations'),
 ]
