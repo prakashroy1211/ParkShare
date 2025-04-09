@@ -43,11 +43,12 @@ p {
     font-size: 16px;
     border-radius: 5px;
     transition: background-color 0.3s ease;
+    border: none;
+    cursor: pointer;
 }
 
 .btn-secondary {
     background-color: #6c757d;
-    border: none;
     color: #fff;
 }
 
@@ -55,9 +56,24 @@ p {
     background-color: #5a6268;
 }
 
+.btn-success {
+    background-color: #2ecc71;
+    color: #fff;
+}
+
+.btn-success:hover {
+    background-color: #27ae60;
+}
+
 .btn-danger {
+    background-color: #e74c3c;
+    color: #fff;
     font-size: 14px;
     padding: 5px 10px;
+}
+
+.btn-danger:hover {
+    background-color: #c0392b;
 }
 
 .links {
@@ -70,34 +86,106 @@ p {
 }
 
 .nav-bar {
-            width: 250px;
-            background-color: #2c3e50;
-            color: #fff;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: flex-start;
-        }
-        .nav-bar h2 {
-            font-size: 24px;
-            margin-bottom: 30px;
-            color: #fff;
-        }
-        .nav-bar a {
-            color: #ecf0f1;
-            text-decoration: none;
-            font-size: 18px;
-            margin-bottom: 15px;
-            transition: color 0.3s ease;
-        }
-        .nav-bar a:hover {
-            color: #3498db;
-        }
-        .content {
-            flex: 1;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-            background-color: #f4f4f4;
-        }
+    width: 250px;
+    background-color: #e74c3c;
+    color: #fff;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.nav-bar h2 {
+    font-size: 24px;
+    margin-bottom: 30px;
+    color: #fff;
+}
+
+.nav-bar a {
+    color: #ecf0f1;
+    text-decoration: none;
+    font-size: 18px;
+    margin-bottom: 15px;
+    transition: color 0.3s ease;
+}
+
+.nav-bar a:hover {
+    color: #3498db;
+}
+
+.dashboard-content {
+    flex: 1;
+    padding: 20px;
+    position: relative; /* Provide positioning context */
+    min-height: 100vh; /* Ensure it takes full height */
+    background-color: #f4f4f4; /* Match the background color from the image */
+}
+
+.top-right-container {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    text-align: right;
+    z-index: 10; /* Ensure it stays above other content */
+}
+
+.user-profile {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    margin-bottom: 5px; /* Space between username and logout */
+}
+
+.user-profile img {
+    width: 30px;
+    height: 30px;
+    margin-right: 10px;
+}
+
+.user-profile span {
+    color: #333;
+    font-size: 16px;
+}
+
+.logout-container {
+    margin: 0;
+}
+
+.logout-btn {
+    background-color: #e74c3c;
+    color: #fff;
+    padding: 5px 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.logout-btn:hover {
+    background-color: #c0392b;
+}
+
+.content-wrapper {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    position: relative;
+    z-index: 1;
+    margin-top: 20px; /* Space from top to avoid overlapping with top-right-container */
+}
+
+.reservation-item {
+    margin-bottom: 15px;
+    padding: 10px;
+    background-color: #f9f9f9;
+    border-radius: 5px;
+}
+
+.content {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    background-color: #f4f4f4;
+}
