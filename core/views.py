@@ -153,15 +153,12 @@ class AddParkingLotAPIView(APIView):
     def post(self, request):
         logger.info(f"Request user: {request.user}, Authenticated: {request.user.is_authenticated}, Roles: {request.user.role}")
         if not request.user.is_authenticated:
-            logger.error("User not authenticated")
             return Response({"status": "error", "message": "You must be logged in to add a parking lot."}, status=status.HTTP_401_UNAUTHORIZED)
 
         tab_id = request.GET.get('tab_id', 'default')
         role_key = f"current_role_{tab_id}"
         user_roles = request.session.get(role_key, request.user.role if isinstance(request.user.role, list) else [request.user.role])
-        logger.info(f"User roles from session (tab {tab_id}): {user_roles}")
         if "owner" not in user_roles:
-            logger.error("User does not have owner role")
             return Response({"status": "error", "message": "Only users with the 'owner' role can add parking lots."}, status=status.HTTP_403_FORBIDDEN)
 
         try:
@@ -169,10 +166,12 @@ class AddParkingLotAPIView(APIView):
             vehicle_type = request.POST.get("vehicle_type")
             vehicle_capacity = request.POST.get("vehicle_capacity")
             price_per_hour = request.POST.get("price_per_hour")
-            location = request.POST.get("location")
+            location_name = request.POST.get("location_name")
+            latitude = request.POST.get("latitude")
+            longitude = request.POST.get("longitude")
             picture = request.FILES.get("picture")
 
-            if not all([lot_name, vehicle_type, vehicle_capacity, price_per_hour, location]):
+            if not all([lot_name, vehicle_type, vehicle_capacity, price_per_hour, location_name, latitude, longitude]):
                 return Response({"status": "error", "message": "All fields are required except picture."}, status=status.HTTP_400_BAD_REQUEST)
 
             parking_lot = ParkingLot(
@@ -181,7 +180,9 @@ class AddParkingLotAPIView(APIView):
                 vehicle_type=vehicle_type,
                 vehicle_capacity=int(vehicle_capacity),
                 price_per_hour=float(price_per_hour),
-                location=location,
+                location_name=location_name,
+                latitude=float(latitude),
+                longitude=float(longitude),
                 picture=picture
             )
             parking_lot.save()
@@ -194,13 +195,96 @@ class AddParkingLotAPIView(APIView):
                     "vehicle_type": parking_lot.vehicle_type,
                     "vehicle_capacity": parking_lot.vehicle_capacity,
                     "price_per_hour": float(parking_lot.price_per_hour),
-                    "location": parking_lot.location,
+                    "location_name": parking_lot.location_name,
+                    "latitude": float(parking_lot.latitude),
+                    "longitude": float(parking_lot.longitude),
                 }
             }, status=status.HTTP_201_CREATED)
         except Exception as e:
             logger.error(f"Error adding parking lot: {str(e)}")
             return Response({"status": "error", "message": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+class ListAllParkingLotsAPIView(APIView):
+    def get(self, request):
+        try:
+            parking_lots = ParkingLot.objects.all()
+            parking_lot_data = [
+                {
+                    "id": pl.id,
+                    "lot_name": pl.lot_name,
+                    "location_name": pl.location_name,
+                    "vehicle_type": pl.vehicle_type,
+                    "vehicle_capacity": pl.vehicle_capacity,
+                    "price_per_hour": float(pl.price_per_hour),
+                    "latitude": float(pl.latitude) if pl.latitude else None,
+                    "longitude": float(pl.longitude) if pl.longitude else None,
+                }
+                for pl in parking_lots
+            ]
+            return Response({"status": "success", "parking_lots": parking_lot_data}, status=status.HTTP_200_OK)
+        except Exception as e:
+            logger.error(f"Error fetching all parking lots: {str(e)}")
+            return Response({"status": "error", "message": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            
+class EditParkingLotAPIView(APIView):
+    def post(self, request):
+        if not request.user.is_authenticated:
+            return Response({"status": "error", "message": "You must be logged in to edit a parking lot."}, status=status.HTTP_401_UNAUTHORIZED)
+
+        tab_id = request.GET.get('tab_id', 'default')
+        role_key = f"current_role_{tab_id}"
+        user_roles = request.session.get(role_key, request.user.role if isinstance(request.user.role, list) else [request.user.role])
+        if "owner" not in user_roles:
+            return Response({"status": "error", "message": "Only users with the 'owner' role can edit parking lots."}, status=status.HTTP_403_FORBIDDEN)
+
+        parking_lot_id = request.data.get("parking_lot_id")
+        if not parking_lot_id:
+            return Response({"status": "error", "message": "Parking lot ID is required."}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            parking_lot = ParkingLot.objects.get(id=parking_lot_id, owner=request.user)
+            
+            lot_name = request.data.get("lot_name", parking_lot.lot_name)
+            vehicle_type = request.data.get("vehicle_type", parking_lot.vehicle_type)
+            vehicle_capacity = request.data.get("vehicle_capacity", parking_lot.vehicle_capacity)
+            price_per_hour = request.data.get("price_per_hour", parking_lot.price_per_hour)
+            location_name = request.data.get("location_name", parking_lot.location_name)
+            latitude = request.data.get("latitude", parking_lot.latitude)
+            longitude = request.data.get("longitude", parking_lot.longitude)
+            picture = request.FILES.get("picture")
+
+            parking_lot.lot_name = lot_name
+            parking_lot.vehicle_type = vehicle_type
+            parking_lot.vehicle_capacity = int(vehicle_capacity)
+            parking_lot.price_per_hour = float(price_per_hour)
+            parking_lot.location_name = location_name
+            parking_lot.latitude = float(latitude) if latitude else parking_lot.latitude
+            parking_lot.longitude = float(longitude) if longitude else parking_lot.longitude
+            if picture:
+                parking_lot.picture = picture
+            parking_lot.save()
+
+            return Response({
+                "status": "success",
+                "message": f"Successfully updated parking lot {parking_lot.lot_name}.",
+                "parking_lot": {
+                    "id": parking_lot.id,
+                    "lot_name": parking_lot.lot_name,
+                    "vehicle_type": parking_lot.vehicle_type,
+                    "vehicle_capacity": parking_lot.vehicle_capacity,
+                    "price_per_hour": float(parking_lot.price_per_hour),
+                    "location_name": parking_lot.location_name,
+                    "latitude": float(parking_lot.latitude),
+                    "longitude": float(parking_lot.longitude),
+                }
+            }, status=status.HTTP_200_OK)
+        except ParkingLot.DoesNotExist:
+            return Response({"status": "error", "message": "Parking lot not found or you do not own it."}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            logger.error(f"Error editing parking lot: {str(e)}", exc_info=True)
+            return Response({"status": "error", "message": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+# Update ListParkingLotsAPIView to include new fields
 class ListParkingLotsAPIView(APIView):
     def get(self, request):
         if not request.user.is_authenticated:
@@ -221,7 +305,9 @@ class ListParkingLotsAPIView(APIView):
                     "vehicle_type": pl.vehicle_type,
                     "vehicle_capacity": pl.vehicle_capacity,
                     "price_per_hour": float(pl.price_per_hour),
-                    "location": pl.location,
+                    "location_name": pl.location_name,
+                    "latitude": float(pl.latitude),
+                    "longitude": float(pl.longitude),
                 }
                 for pl in parking_lots
             ]
@@ -232,39 +318,7 @@ class ListParkingLotsAPIView(APIView):
         except Exception as e:
             logger.error(f"Error fetching parking lots: {str(e)}")
             return Response({"status": "error", "message": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-class ListAllParkingLotsAPIView(APIView):
-    def get(self, request):
-        if not request.user.is_authenticated:
-            return Response({"status": "error", "message": "You must be logged in to view parking lots."}, status=status.HTTP_401_UNAUTHORIZED)
-
-        tab_id = request.GET.get('tab_id', 'default')
-        role_key = f"current_role_{tab_id}"
-        user_roles = request.session.get(role_key, request.user.role if isinstance(request.user.role, list) else [request.user.role])
-        if "driver" not in user_roles:
-            return Response({"status": "error", "message": "Only users with the 'driver' role can view all parking lots."}, status=status.HTTP_403_FORBIDDEN)
-
-        try:
-            parking_lots = ParkingLot.objects.all()
-            parking_lot_data = [
-                {
-                    "id": pl.id,
-                    "lot_name": pl.lot_name,
-                    "vehicle_type": pl.vehicle_type,
-                    "vehicle_capacity": pl.vehicle_capacity,
-                    "price_per_hour": float(pl.price_per_hour),
-                    "location": pl.location,
-                }
-                for pl in parking_lots
-            ]
-            return Response({
-                "status": "success",
-                "parking_lots": parking_lot_data
-            }, status=status.HTTP_200_OK)
-        except Exception as e:
-            logger.error(f"Error fetching all parking lots: {str(e)}")
-            return Response({"status": "error", "message": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
+            
 class ReserveParkingLotAPIView(APIView):
     def post(self, request):
         logger.info(f"Reserve request received: {request.data}, user: {request.user}")
