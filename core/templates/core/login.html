@@ -1,3 +1,4 @@
+<!-- core/templates/core/login.html -->
 <!DOCTYPE html>
 {% load static %}
 <html lang="en">
@@ -8,6 +9,37 @@
     <link rel="stylesheet" href="{% static 'css/login.css' %}">
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-content {
+            background: white;
+            padding: 20px;
+            border-radius: 5px;
+            text-align: center;
+        }
+        .btn {
+            margin: 10px;
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .btn:hover {
+            background-color: #0056b3;
+        }
+    </style>
 </head>
 <body>
     <div class="container-fluid">
@@ -22,10 +54,10 @@
                     <form id="login-form">
                         {% csrf_token %}
                         <div class="mb-3">
-                            <input type="email" id="username" placeholder="Email" required>
+                            <input type="email" id="username" name="username" placeholder="Email" required>
                         </div>
                         <div class="mb-3">
-                            <input type="password" id="password" placeholder="Password" required>
+                            <input type="password" id="password" name="password" placeholder="Password" required>
                         </div>
                         <button type="submit">Login</button>
                     </form>
@@ -39,14 +71,14 @@
     <div id="roleSelectionModal" class="modal" style="display: none;">
         <div class="modal-content">
             <h2>Select Your Role</h2>
-            <p>You have both 'Driver' and 'Owner' roles. Choose how you want to continue:</p>
-            <button onclick="selectRole('driver')" class="btn">Continue as Driver</button>
-            <button onclick="selectRole('owner')" class="btn">Continue as Owner</button>
+            <p>Choose how you want to continue:</p>
+            <div id="roleButtons"></div>
         </div>
     </div>
     <script>
     const tabId = Date.now().toString() + Math.random().toString(36).substr(2, 9);
     sessionStorage.setItem('tab_id', tabId);
+
     document.getElementById('login-form').addEventListener('submit', async function(event) {
         event.preventDefault();
         const data = {
@@ -65,19 +97,29 @@
             });
             const responseData = await response.json();
             console.log("Response Data:", responseData);
+
             if (response.status === 200) {
                 if (responseData.csrf_token) {
                     document.cookie = `csrftoken=${responseData.csrf_token}; path=/; SameSite=Lax`;
                     console.log("Updated CSRF token:", responseData.csrf_token);
                 }
                 sessionStorage.setItem("user", JSON.stringify(responseData));
+
                 const roles = responseData.roles || [];
-                if (roles.includes("driver") && roles.includes("owner")) {
-                    document.getElementById("roleSelectionModal").style.display = "block";
-                } else if (roles.includes("driver")) {
-                    window.location.href = `{% url 'user_dashboard' %}?tab_id=${tabId}`;
-                } else if (roles.includes("owner")) {
-                    window.location.href = `{% url 'owner_dashboard' %}?tab_id=${tabId}`;
+                if (responseData.redirect_url) {
+                    window.location.href = responseData.redirect_url;
+                } else if (roles.length > 1) {
+                    // Show modal for multiple roles
+                    document.getElementById("roleSelectionModal").style.display = "flex";
+                    const roleButtons = document.getElementById("roleButtons");
+                    roleButtons.innerHTML = '';
+                    roles.forEach(role => {
+                        const btn = document.createElement("button");
+                        btn.className = "btn";
+                        btn.textContent = `Continue as ${role.charAt(0).toUpperCase() + role.slice(1)}`;
+                        btn.onclick = () => selectRole(role);
+                        roleButtons.appendChild(btn);
+                    });
                 } else {
                     alert("No valid roles found. Please contact support.");
                 }
@@ -89,13 +131,17 @@
             alert("Login failed due to a server error.");
         }
     });
+
     function selectRole(role) {
         const tabId = sessionStorage.getItem('tab_id');
         if (role === "driver") {
             window.location.href = `{% url 'user_dashboard' %}?tab_id=${tabId}`;
         } else if (role === "owner") {
             window.location.href = `{% url 'owner_dashboard' %}?tab_id=${tabId}`;
+        } else if (role === "admin") {
+            window.location.href = `{% url 'admin_dashboard' %}?tab_id=${tabId}`;
         }
+        document.getElementById("roleSelectionModal").style.display = "none";
     }
     </script>
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>

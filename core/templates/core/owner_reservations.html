@@ -6,7 +6,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Owner Reservations - ParkShare</title>
-    <link rel="stylesheet" href="{% static 'css/owner_dashboard.css' %}"> <!-- Reuse owner_dashboard.css -->
+    <link rel="stylesheet" href="{% static 'css/owner_dashboard.css' %}">
     <style>
         .reservation-item {
             border: 1px solid #ccc;
@@ -14,33 +14,26 @@
             margin: 10px 0;
             border-radius: 5px;
         }
+        .error-message { color: red; }
     </style>
 </head>
 <body>
-    <!-- CSRF Token -->
     <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}" id="csrf-token">
 
-    <!-- Sidebar -->
     <div class="nav-bar">
         <h2>ParkShare</h2>
         <a href="{% url 'owner_dashboard' %}?tab_id={{ request.GET.tab_id|default:'default' }}">My Parking Lots</a>
         <a href="{% url 'owner_reservations' %}?tab_id={{ request.GET.tab_id|default:'default' }}" class="active">Reservations</a>
     </div>
 
-    <!-- Main Content -->
     <div class="dashboard-content">
-        <!-- Top Bar -->
         <div class="top-bar">
             <h1>Reservations for My Parking Lots</h1>
         </div>
-
-        <!-- User Profile -->
         <div class="user-profile">
             <img src="{% static 'images/user.png' %}" alt="User">
             <span>{{ user.username }}</span>
         </div>
-
-        <!-- Logout Container -->
         <div class="logout-container">
             <form id="logout-form" method="POST" action="{% url 'logout' %}?tab_id={{ request.GET.tab_id|default:'default' }}">
                 {% csrf_token %}
@@ -48,7 +41,6 @@
             </form>
         </div>
 
-        <!-- Reservations List -->
         <div id="reservations-list">
             <p>Loading reservations...</p>
         </div>
@@ -59,7 +51,6 @@
     const tabId = sessionStorage.getItem('tab_id') || urlParams.get('tab_id') || 'default';
     sessionStorage.setItem('tab_id', tabId);
 
-    // Get CSRF Token
     function getCookie(name) {
         let cookieValue = null;
         if (document.cookie && document.cookie !== '') {
@@ -103,7 +94,6 @@
         }
     }
 
-    // Fetch and Display Reservations
     document.addEventListener('DOMContentLoaded', async () => {
         try {
             const response = await fetch(`/api/owner-reservations/?tab_id=${tabId}`, {
@@ -130,6 +120,8 @@
                     resDiv.innerHTML = `
                         <h3>${res.lot_name}</h3>
                         <p>Location: ${res.location}</p>
+                        <p>Vehicle Capacity: ${res.vehicle_capacity}</p>
+                        <p>Price per Hour: Rs ${res.price_per_hour}</p>
                         <p>Reserved by: ${res.user}</p>
                         <p>Status: ${res.status}</p>
                         <p>Created: ${new Date(res.created_at).toLocaleString()}</p>
@@ -145,11 +137,10 @@
             }
         } catch (error) {
             console.error('Error fetching reservations:', error);
-            document.getElementById('reservations-list').innerHTML = `<p>Error loading reservations: ${error.message}</p>`;
+            document.getElementById('reservations-list').innerHTML = `<p class="error-message">Error loading reservations: ${error.message}</p>`;
         }
     });
 
-    // Logout Handler
     document.getElementById('logout-form').addEventListener('submit', async function(event) {
         event.preventDefault();
         try {

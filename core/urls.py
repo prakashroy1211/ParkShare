@@ -18,6 +18,9 @@ urlpatterns = [
     path('api/owner-reservations/', views.OwnerReservationsAPIView.as_view(), name='owner_reservations_api'),
     path('api/edit-parking-lot/', views.EditParkingLotAPIView.as_view(), name='edit_parking_lot_api'),
     path('api/delete-parking-lot/', views.DeleteParkingLotAPIView.as_view(), name='delete_parking_lot_api'),
+    path('api/admin-analytics/', views.AdminAnalyticsAPIView.as_view(), name='admin_analytics'),
+    path('api/admin-report-download/', views.AdminReportDownloadAPIView.as_view(), name='admin_report_download'),
+    path('api/download-receipt/', views.DownloadReceiptAPIView.as_view(), name='download_receipt'),
     
     # Frontend Pages
     path('', views.home_view, name='home'),
@@ -30,4 +33,5 @@ urlpatterns = [
     path('role-redirect/', views.role_redirect_view, name='role-redirect'),
     path('view-reservations/', views.view_reservations, name='view_reservations'),
     path('owner_reservations/', views.owner_reservations_view, name='owner_reservations'),
+    path('admin_dashboard/', views.admin_dashboard_view, name='admin_dashboard'),
 ]

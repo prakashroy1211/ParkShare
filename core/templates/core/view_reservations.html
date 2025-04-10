@@ -7,6 +7,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ParkShare - View Reservations</title>
     <link rel="stylesheet" href="{% static 'css/view_reservations.css' %}">
+    <style>
+        .reservation-item {
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+        }
+        .error-message { color: red; }
+    </style>
 </head>
 <body>
     <div class="nav-bar">
@@ -29,7 +38,9 @@
         </div>
         <div class="content-wrapper">
             <h2>Your Reservations</h2>
-            <div id="reservationsList"></div>
+            <div id="reservationsList">
+                <p>Loading reservations...</p>
+            </div>
         </div>
     </div>
     <script>
@@ -97,7 +108,7 @@
             })
             .catch(error => {
                 console.error('Error fetching reservations:', error);
-                document.getElementById('reservationsList').innerHTML = '<p>Error loading reservations: ' + error.message + '</p>';
+                document.getElementById('reservationsList').innerHTML = '<p class="error-message">Error loading reservations: ' + error.message + '</p>';
             });
         });
 
@@ -115,6 +126,8 @@
                 resDiv.innerHTML = `
                     <strong>${reservation.lot_name}</strong><br>
                     Location: ${reservation.location}<br>
+                    Vehicle Type: ${reservation.vehicle_type}<br>
+                    Price per Hour: Rs ${reservation.price_per_hour}<br>
                     Reserved on: ${new Date(reservation.timestamp).toLocaleString()}<br>
                     Status: ${reservation.status}
                 `;

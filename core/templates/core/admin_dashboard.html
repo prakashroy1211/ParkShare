@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - ParkShare</title>
+    <link rel="stylesheet" href="{% static 'css/admin_dashboard.css' %}">
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+</head>
+<body>
+    <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}" id="csrf-token">
+
+    <div class="nav-bar">
+        <h2>ParkShare</h2>
+        <a href="{% url 'admin_dashboard' %}?tab_id={{ request.GET.tab_id|default:'default' }}" class="active">Admin Dashboard</a>
+    </div>
+
+    <div class="dashboard-content">
+        <div class="top-bar">
+            <h1>Admin Dashboard</h1>
+            <div class="top-bar-right">
+                <div class="user-profile">
+                    <img src="{% static 'images/user.png' %}" alt="User">
+                    <span>{{ user.username }}</span>
+                </div>
+                <div class="logout-container">
+                    <form id="logout-form" method="POST" action="{% url 'logout' %}?tab_id={{ request.GET.tab_id|default:'default' }}">
+                        {% csrf_token %}
+                        <button type="submit" class="logout-btn">Logout</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+            <button id="download-report-btn" class="download-btn">Download Report</button><br><br>
+        <div class="analytics-grid" id="analyticsGrid">
+            <p>Loading analytics...</p>
+        </div>
+
+        <div class="chart-container">
+            <canvas id="analyticsChart"></canvas>
+        </div>
+    </div>
+
+    <script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const tabId = sessionStorage.getItem('tab_id') || urlParams.get('tab_id') || 'default';
+    sessionStorage.setItem('tab_id', tabId);
+
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let cookie of cookies) {
+                cookie = cookie.trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    function getCsrfToken() {
+        const token = document.querySelector('#csrf-token')?.value || getCookie('csrftoken');
+        if (!token || token.length !== 64) {
+            console.error('Invalid or missing CSRF token');
+            throw new Error('CSRF token is missing or invalid');
+        }
+        return token;
+    }
+
+    async function fetchCsrfToken() {
+        try {
+            const response = await fetch(`/api/get-csrf-token/?tab_id=${tabId}`, {
+                method: 'GET',
+                credentials: 'include'
+            });
+            if (!response.ok) throw new Error(`Failed to fetch CSRF token: ${response.status}`);
+            const data = await response.json();
+            if (data.csrf_token) {
+                document.cookie = `csrftoken=${data.csrf_token}; path=/; SameSite=Lax`;
+                return data.csrf_token;
+            }
+            throw new Error("CSRF token not returned");
+        } catch (error) {
+            console.error("Error fetching CSRF token:", error);
+            return null;
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', async () => {
+        try {
+            const response = await fetch(`/api/admin-analytics/?tab_id=${tabId}`, {
+                method: 'GET',
+                headers: {
+                    'X-CSRFToken': getCsrfToken(),
+                },
+                credentials: 'include'
+            });
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(`Failed to fetch analytics: ${response.status} - ${errorText}`);
+            }
+
+            const data = await response.json();
+            const analyticsGrid = document.getElementById('analyticsGrid');
+            analyticsGrid.innerHTML = '';
+
+            if (data.status === 'success') {
+                const analytics = data.analytics;
+                const cards = [
+                    { title: 'Total Parking Lots', value: analytics.total_parking_lots },
+                    { title: 'Total Users', value: analytics.total_users },
+                    { title: 'Average Occupancy', value: `${analytics.average_occupancy}%` },
+                    { title: 'Active Reservations', value: analytics.active_reservations }
+                ];
+
+                cards.forEach(card => {
+                    const cardDiv = document.createElement('div');
+                    cardDiv.className = 'analytic-card';
+                    cardDiv.innerHTML = `
+                        <h3>${card.title}</h3>
+                        <p>${card.value}</p>
+                    `;
+                    analyticsGrid.appendChild(cardDiv);
+                });
+
+                const ctx = document.getElementById('analyticsChart').getContext('2d');
+                new Chart(ctx, {
+                    type: 'pie',
+                    data: {
+                        labels: ['Total Parking Lots', 'Total Users', 'Average Occupancy (%)', 'Active Reservations'],
+                        datasets: [{
+                            data: [
+                                analytics.total_parking_lots,
+                                analytics.total_users,
+                                analytics.average_occupancy,
+                                analytics.active_reservations
+                            ],
+                            backgroundColor: [
+                                'rgba(54, 162, 235, 0.8)',
+                                'rgba(255, 99, 132, 0.8)',
+                                'rgba(75, 192, 192, 0.8)',
+                                'rgba(255, 205, 86, 0.8)'
+                            ],
+                            borderColor: [
+                                'rgba(54, 162, 235, 1)',
+                                'rgba(255, 99, 132, 1)',
+                                'rgba(75, 192, 192, 1)',
+                                'rgba(255, 205, 86, 1)'
+                            ],
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: { position: 'top' },
+                            title: { display: true, text: 'ParkShare Analytics Overview' }
+                        }
+                    }
+                });
+            } else {
+                analyticsGrid.innerHTML = `<p class="error-message">${data.message}</p>`;
+            }
+        } catch (error) {
+            console.error('Error fetching analytics:', error);
+            document.getElementById('analyticsGrid').innerHTML = `<p class="error-message">Error loading analytics: ${error.message}</p>`;
+        }
+    });
+
+    document.getElementById('logout-form').addEventListener('submit', async function(event) {
+        event.preventDefault();
+        try {
+            let csrfToken = document.querySelector('#csrf-token')?.value || getCookie("csrftoken");
+            const freshCsrfToken = await fetchCsrfToken();
+            if (freshCsrfToken) csrfToken = freshCsrfToken;
+
+            if (!csrfToken) throw new Error("CSRF token missing. Please refresh the page.");
+
+            const response = await fetch(`/logout/?tab_id=${tabId}`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrfToken,
+                },
+                credentials: 'include'
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+            }
+
+            const responseData = await response.json();
+            if (responseData.message === "Logout successful") {
+                if (responseData.csrf_token) {
+                    document.cookie = `csrftoken=${responseData.csrf_token}; path=/; SameSite=Lax`;
+                }
+                sessionStorage.removeItem("user");
+                sessionStorage.removeItem("tab_id");
+                window.location.href = `/login/?tab_id=${tabId}`;
+            } else {
+                throw new Error(responseData.message || "Logout failed");
+            }
+        } catch (error) {
+            console.error("Error during logout:", error);
+            alert("Error during logout: " + error.message);
+        }
+    });
+
+    document.getElementById('download-report-btn').addEventListener('click', async () => {
+        try {
+            const csrfToken = getCsrfToken();
+            const response = await fetch(`/api/admin-report-download/?tab_id=${tabId}`, {
+                method: 'GET',
+                headers: {
+                    'X-CSRFToken': csrfToken,
+                },
+                credentials: 'include'
+            });
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(`Failed to download report: ${response.status} - ${errorText}`);
+            }
+
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'ParkShare_Admin_Report.pdf';
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            window.URL.revokeObjectURL(url);
+        } catch (error) {
+            console.error('Error downloading report:', error);
+            alert('Error downloading report: ' + error.message);
+        }
+    });
+    </script>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>
