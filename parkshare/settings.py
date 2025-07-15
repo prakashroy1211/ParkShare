@@ -21,7 +21,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-*f-!xcoi!5rz-g38%8yh2jyxzn7+$uwn1-)03!e%-w4b*_xrow'
+SECRET_KEY = '#####'
 
 ALLOWED_HOSTS = ['parkshare.site', 'www.parkshare.site', '15.207.133.192', 'localhost', '127.0.0.1', '172.31.14.101', 'parkshare-alb-104455196.ap-south-1.elb.amazonaws.com']
 CSRF_TRUSTED_ORIGINS = ['https://parkshare.site', 'https://www.parkshare.site']
@@ -84,9 +84,9 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'parksharedb',
-        'USER': 'parkshare',
-        'PASSWORD': 'Prakash24100534',
-        'HOST': 'parksharedb.c7k4662ko9zg.ap-south-1.rds.amazonaws.com',
+        'USER': '#####',
+        'PASSWORD': '#####',
+        'HOST': '#####',
         'PORT': '5432',
     }
 }
@@ -158,8 +158,8 @@ AUTHENTICATION_BACKENDS = [
 ]
 LOGIN_URL = '/login/'
 
-AWS_ACCESS_KEY_ID = 'AKIA5UHF6GGEOQX2MWOI '
-AWS_SECRET_ACCESS_KEY = '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'
+AWS_ACCESS_KEY_ID = '#####'
+AWS_SECRET_ACCESS_KEY = '#####'
 AWS_STORAGE_BUCKET_NAME = 'parkshare-bucket'
 AWS_S3_SIGNATURE_NAME = 's3v4',
 AWS_S3_REGION_NAME = 'ap-south-1'
